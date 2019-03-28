@@ -21,12 +21,14 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		String fileName1 = "Club.java";
 		String fileName2 = "TestJava.java";
+		String fileName3 = "Bar.java";
 		String testCode = "public class Person {" + "int number;" + "int numberOne = 1;" + "public void testFunction(){"
 				+ "int i = 1;" + "}" + "};" + "public class B { }";
 
 		testParseFromString(testCode);
 		ParseFromFile.testReadAndParseFromeFile(fileName1);
 		ModifyFile.testModifyFile(fileName2);
+		AnalysisSymbol.testAnalysisSymbol(fileName1);
 	}
 
 	private static void testParseFromString(String code) throws Exception {
@@ -38,5 +40,4 @@ public class Main {
 		System.out.println(classPerson.toString());
 
 	}
-
 }
