@@ -1,3 +1,7 @@
+# customized tmp folder
+tmp/
+output/
+
 # Compiled class file
 *.class
 
