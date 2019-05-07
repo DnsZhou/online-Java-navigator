@@ -29,22 +29,21 @@ import java.util.zip.ZipInputStream;
  * Driver for the parsing and html generation task.
  */
 public class RepositoryWalker {
-    //                    solved the separator difference between Linux and Windows environment
-    static String SLASH_TAG = File.separator;
 
     public static void main(String[] args) throws Exception {
 
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "repository");
+        File inputRepoRootDir = new File("/tmp/repository");
 
         // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "htdocs"); // expect ~227021 files.
+        File outputHtmlRootDir = new File("/tmp/htdocs"); // expect ~227021 files.
 
         RepositoryWalker instance = new RepositoryWalker();
         instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
     }
 
     private void processRepository(File inputRepoRootDir, File outputHtmlRootDir) throws IOException {
+
         Files.walkFileTree(inputRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
@@ -56,13 +55,12 @@ public class RepositoryWalker {
                     File targetDir = new File(outputHtmlRootDir, relativePath);
                     Files.createDirectories(targetDir.toPath());
 
-//                    solve the separator problem with regular expression
-                    String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
+                    String[] pathTokens = relativePath.substring(1).split("/");
 
                     String artifact = pathTokens[pathTokens.length - 3];
                     String version = pathTokens[pathTokens.length - 2];
-                    String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
-                    group = group.replace(SLASH_TAG, ".");
+                    String group = relativePath.substring(1).replace("/" + artifact + "/" + version + "/" + artifact + "-" + version, "");
+                    group = group.replace("/", ".");
 
                     ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.toFile()));
                     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -81,7 +79,6 @@ public class RepositoryWalker {
 
                                 byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath());
 
-//                                @TODO: compare the two byte things.
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
                                 }
