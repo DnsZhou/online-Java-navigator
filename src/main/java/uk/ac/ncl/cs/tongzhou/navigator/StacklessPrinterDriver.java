@@ -30,16 +30,16 @@ public class StacklessPrinterDriver {
     private static final DataKey<Boolean> STACKLESS_IS_PHANTOM = new DataKey<>() {
     };
 
-    private final Printer printer;
+    private final HtmlPrinter htmlPrinter;
 
-    public StacklessPrinterDriver(Printer printer) {
-        this.printer = printer;
+    public StacklessPrinterDriver(HtmlPrinter htmlPrinter) {
+        this.htmlPrinter = htmlPrinter;
     }
 
-    public static String print(Node node, Printer printer) {
-        StacklessPrinterDriver printerDriver = new StacklessPrinterDriver(printer);
+    public static String print(Node node, HtmlPrinter htmlPrinter) {
+        StacklessPrinterDriver printerDriver = new StacklessPrinterDriver(htmlPrinter);
         printerDriver.print(node);
-        String out = printer.getPrintout();
+        String out = htmlPrinter.getPrintout();
         return out;
     }
 
@@ -76,7 +76,7 @@ public class StacklessPrinterDriver {
 
             while (true) {
                 if (current.getRange().get().begin == token.getRange().get().begin) {
-                    printer.begin(current);
+                    htmlPrinter.begin(current);
                     openNodes.push(current);
                     List<Node> children = prepareChildren(current);
                     current.setData(PREPARED_CHILDREN, children);
@@ -91,12 +91,12 @@ public class StacklessPrinterDriver {
                 }
             }
 
-            printer.printToken(token, current);
+            htmlPrinter.printToken(token, current);
 
             while (true) {
 
                 if (current.getRange().get().end == token.getRange().get().end) {
-                    printer.end(current);
+                    htmlPrinter.end(current);
                     openNodes.pop();
                     if (!openNodes.isEmpty()) {
                         current = openNodes.peek();

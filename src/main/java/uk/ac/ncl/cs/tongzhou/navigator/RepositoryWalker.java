@@ -31,6 +31,7 @@ import java.util.zip.ZipInputStream;
 public class RepositoryWalker {
     //                    solved the separator difference between Linux and Windows environment
     static String SLASH_TAG = File.separator;
+    static String TARGET_EXTENSION= "html";
 
     public static void main(String[] args) throws Exception {
 
@@ -73,7 +74,7 @@ public class RepositoryWalker {
                             byte[] inputBytes = zipInputStream.readAllBytes();
 
                             String cuName = zipEntry.getName().replace(".java", "");
-                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", ".html"));
+                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "."+TARGET_EXTENSION));
 
                             if (!outputFile.exists()) {
 
@@ -109,7 +110,7 @@ public class RepositoryWalker {
 
         byte[] bytesOut;
         try {
-            String outputString = StacklessPrinterDriver.print(compilationUnit, new Printer());
+            String outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Error e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());
