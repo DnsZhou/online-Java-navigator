@@ -51,7 +51,7 @@ public class RepositoryWalker {
 
                 if (file.toFile().isFile() && file.toFile().getName().endsWith("-sources.jar")) {
                     String relativePath = file.toString()
-                            .replace(inputRepoRootDir.getAbsolutePath(), "")
+                            .replace(inputRepoRootDir.getPath(), "")
                             .replace("-sources.jar", "");
                     File targetDir = new File(outputHtmlRootDir, relativePath);
                     Files.createDirectories(targetDir.toPath());
