@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream;
 public class RepositoryWalker {
     //                    solved the separator difference between Linux and Windows environment
     static String SLASH_TAG = File.separator;
-    static String TARGET_EXTENSION= "html";
+    static String TARGET_EXTENSION = "java";
 
     public static void main(String[] args) throws Exception {
 
@@ -39,7 +39,7 @@ public class RepositoryWalker {
         File inputRepoRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "repository");
 
         // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "htdocs"); // expect ~227021 files.
+        File outputHtmlRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + TARGET_EXTENSION +"Docs"); // expect ~227021 files.
 
         RepositoryWalker instance = new RepositoryWalker();
         instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
@@ -74,7 +74,7 @@ public class RepositoryWalker {
                             byte[] inputBytes = zipInputStream.readAllBytes();
 
                             String cuName = zipEntry.getName().replace(".java", "");
-                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "."+TARGET_EXTENSION));
+                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "." + TARGET_EXTENSION));
 
                             if (!outputFile.exists()) {
 
@@ -109,8 +109,16 @@ public class RepositoryWalker {
         }
 
         byte[] bytesOut;
+        String outputString = null;
         try {
-            String outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
+            switch (TARGET_EXTENSION) {
+                case "html":
+                    outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
+                    break;
+                default:
+                    outputString = StacklessPrinterDriver.print(compilationUnit, new Printer());
+                    break;
+            }
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Error e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());

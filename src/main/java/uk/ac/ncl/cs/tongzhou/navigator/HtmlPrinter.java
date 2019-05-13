@@ -19,17 +19,7 @@ import com.github.javaparser.ast.Node;
 /**
  * A generic printer that recreates the original source file content.
  */
-public class HtmlPrinter {
-
-    protected final StringBuilder stringBuilder = new StringBuilder();
-
-    public String getPrintout() {
-        return stringBuilder.toString();
-    }
-
-    public void printToken(JavaToken javaToken, Node node) {
-        stringBuilder.append(javaToken.getText());
-    }
+public class HtmlPrinter extends Printer {
 
     public void begin(Node node) {
 
@@ -49,7 +39,5 @@ public class HtmlPrinter {
         if (node instanceof CompilationUnit) {
             stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
         }
-
-//        stringBuilder.append("</span>");
     }
 }

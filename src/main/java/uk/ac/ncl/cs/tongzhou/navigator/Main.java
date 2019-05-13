@@ -1,5 +1,6 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
+import java.util.Date;
 import java.util.Optional;
 
 import com.github.javaparser.StaticJavaParser;
@@ -25,7 +26,9 @@ public class Main<T> {
 //		ParseFromFile.testReadAndParseFromeFile(fileName1);
 //		ModifyFile.testModifyFile(fileName2);
 //		AnalysisSymbol.testAnalysisSymbol(fileName1);
+        System.out.println("Start parsing the full repository on "+new Date());
         RepositoryWalker.main(args);
+        System.out.println("Finish parsing the full repository on "+new Date());
     }
 
     private static void testParseFromString(String code) throws Exception {
