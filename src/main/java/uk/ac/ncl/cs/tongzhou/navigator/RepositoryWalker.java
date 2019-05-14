@@ -29,38 +29,41 @@ import java.util.zip.ZipInputStream;
  * Driver for the parsing and html generation task.
  */
 public class RepositoryWalker {
+    //                    solved the separator difference between Linux and Windows environment
+    static String SLASH_TAG = File.separator;
+    static String TARGET_EXTENSION = "java";
 
     public static void main(String[] args) throws Exception {
 
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("/tmp/repository");
+        File inputRepoRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "repository");
 
         // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("/tmp/htdocs"); // expect ~227021 files.
+        File outputHtmlRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + TARGET_EXTENSION +"Docs"); // expect ~227021 files.
 
         RepositoryWalker instance = new RepositoryWalker();
         instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
     }
 
     private void processRepository(File inputRepoRootDir, File outputHtmlRootDir) throws IOException {
-
         Files.walkFileTree(inputRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
 
                 if (file.toFile().isFile() && file.toFile().getName().endsWith("-sources.jar")) {
                     String relativePath = file.toString()
-                            .replace(inputRepoRootDir.getAbsolutePath(), "")
+                            .replace(inputRepoRootDir.getPath(), "")
                             .replace("-sources.jar", "");
                     File targetDir = new File(outputHtmlRootDir, relativePath);
                     Files.createDirectories(targetDir.toPath());
 
-                    String[] pathTokens = relativePath.substring(1).split("/");
+//                    solve the separator problem with regular expression
+                    String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
 
                     String artifact = pathTokens[pathTokens.length - 3];
                     String version = pathTokens[pathTokens.length - 2];
-                    String group = relativePath.substring(1).replace("/" + artifact + "/" + version + "/" + artifact + "-" + version, "");
-                    group = group.replace("/", ".");
+                    String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
+                    group = group.replace(SLASH_TAG, ".");
 
                     ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.toFile()));
                     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -71,7 +74,7 @@ public class RepositoryWalker {
                             byte[] inputBytes = zipInputStream.readAllBytes();
 
                             String cuName = zipEntry.getName().replace(".java", "");
-                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", ".html"));
+                            File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "." + TARGET_EXTENSION));
 
                             if (!outputFile.exists()) {
 
@@ -79,6 +82,7 @@ public class RepositoryWalker {
 
                                 byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath());
 
+//                                @TODO: compare the two byte things.
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
                                 }
@@ -105,8 +109,16 @@ public class RepositoryWalker {
         }
 
         byte[] bytesOut;
+        String outputString = null;
         try {
-            String outputString = StacklessPrinterDriver.print(compilationUnit, new Printer());
+            switch (TARGET_EXTENSION) {
+                case "html":
+                    outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
+                    break;
+                default:
+                    outputString = StacklessPrinterDriver.print(compilationUnit, new Printer());
+                    break;
+            }
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Error e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());

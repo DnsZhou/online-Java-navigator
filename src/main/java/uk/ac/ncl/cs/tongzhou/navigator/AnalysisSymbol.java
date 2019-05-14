@@ -12,6 +12,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 public class AnalysisSymbol {
+private String fileName;
 	public static void testAnalysisSymbol(String fileName) throws IOException {
 
 		String path = "src/main/resources/";
@@ -36,5 +37,11 @@ public class AnalysisSymbol {
 			// Show that it's "double" in every case:
 			System.out.println(be.toString() + " is a: " + resolvedType);
 		});
+	}
+
+	class testClass extends AnalysisSymbol{
+		private void testMethod(){
+			super.fileName = null;
+		}
 	}
 }
