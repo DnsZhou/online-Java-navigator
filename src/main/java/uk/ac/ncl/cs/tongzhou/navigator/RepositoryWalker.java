@@ -17,10 +17,7 @@ import com.github.javaparser.ast.CompilationUnit;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,14 +29,15 @@ public class RepositoryWalker {
     //                    solved the separator difference between Linux and Windows environment
     static String SLASH_TAG = File.separator;
     static String TARGET_EXTENSION = "java";
+    static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "ErrorDocs");
 
     public static void main(String[] args) throws Exception {
 
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + "repository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "fullRepository");
 
         // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("." + SLASH_TAG + "tmp" + SLASH_TAG + TARGET_EXTENSION +"Docs"); // expect ~227021 files.
+        File outputHtmlRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
 
         RepositoryWalker instance = new RepositoryWalker();
         instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
@@ -102,15 +100,10 @@ public class RepositoryWalker {
     }
 
     private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath) {
-
-        CompilationUnit compilationUnit = parseWithFallback(inputBytes);
-        if (compilationUnit == null) {
-            return null;
-        }
-
         byte[] bytesOut;
         String outputString = null;
         try {
+            CompilationUnit compilationUnit = parseWithFallback(inputBytes);
             switch (TARGET_EXTENSION) {
                 case "html":
                     outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
@@ -120,8 +113,15 @@ public class RepositoryWalker {
                     break;
             }
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
-        } catch (Error e) {
+        } catch (Throwable e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());
+            try {
+                File outputFile = new File(outputErrorFileRootDir.getAbsolutePath(), outputPath.toString());
+                outputFile.getParentFile().mkdirs();
+                Files.write(outputFile.toPath(), inputBytes);
+            } catch (Exception fe) {
+                System.out.println("ERROR: can not generate the error file to folder: " + fe.toString());
+            }
             return null;
         }
 
