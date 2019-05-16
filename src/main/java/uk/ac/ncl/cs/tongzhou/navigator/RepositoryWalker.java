@@ -15,10 +15,17 @@ package uk.ac.ncl.cs.tongzhou.navigator;
 import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,15 +33,20 @@ import java.util.zip.ZipInputStream;
  * Driver for the parsing and html generation task.
  */
 public class RepositoryWalker {
-    //                    solved the separator difference between Linux and Windows environment
-    static String SLASH_TAG = File.separator;
     static String TARGET_EXTENSION = "java";
+    static int ALL_FILE_AMOUNT = 227021;
+
+    /**
+     * To solve the separator difference between Linux and Windows environment
+     */
+    static String SLASH_TAG = File.separator;
+
+    // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "ErrorDocs");
 
     public static void main(String[] args) throws Exception {
-
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "fullRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "Repository");
 
         // TODO change me to an empty dir where the output will be written
         File outputHtmlRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
@@ -45,6 +57,9 @@ public class RepositoryWalker {
 
     private void processRepository(File inputRepoRootDir, File outputHtmlRootDir) throws IOException {
         Files.walkFileTree(inputRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
+            int processedFileCount = 0;
+            int currentPercentage = 0;
+
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
 
@@ -55,7 +70,9 @@ public class RepositoryWalker {
                     File targetDir = new File(outputHtmlRootDir, relativePath);
                     Files.createDirectories(targetDir.toPath());
 
-//                    solve the separator problem with regular expression
+                    /**
+                     * To solve the separator problem with regular expression
+                     */
                     String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
 
                     String artifact = pathTokens[pathTokens.length - 3];
@@ -80,7 +97,6 @@ public class RepositoryWalker {
 
                                 byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath());
 
-//                                @TODO: compare the two byte things.
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
                                 }
@@ -88,12 +104,22 @@ public class RepositoryWalker {
                             } else {
                                 System.out.println("target file exists " + file.toFile().getAbsolutePath() + " " + cuName);
                             }
+                            printPercentage();
                         }
                         zipEntry = zipInputStream.getNextEntry();
                     }
                     zipInputStream.close();
                 }
                 return FileVisitResult.CONTINUE;
+            }
+
+            private void printPercentage() {
+                this.processedFileCount++;
+                int newPercentage = (processedFileCount * 1000) / ALL_FILE_AMOUNT;
+                if (newPercentage != this.currentPercentage) {
+                    this.currentPercentage = newPercentage;
+                    System.out.println((double) newPercentage / 10 + "% " + new Date());
+                }
             }
         });
 
@@ -140,17 +166,24 @@ public class RepositoryWalker {
 
         CompilationUnit compilationUnit = null;
         for (int i = 0; i < levels.length && compilationUnit == null; i++) {
-            compilationUnit = tryParseAtLevel(inputBytes, levels[i]);
+            compilationUnit = tryParseAtLevel(inputBytes, levels[i], false);
+
+            /** If parsing failed with all version of java, then try parsing with Unicode Escapes*/
+            if (compilationUnit == null)
+                compilationUnit = tryParseAtLevel(inputBytes, levels[i], true);
         }
 
         return compilationUnit;
     }
 
-    private CompilationUnit tryParseAtLevel(byte[] inputBytes, ParserConfiguration.LanguageLevel languageLevel) {
+    private CompilationUnit tryParseAtLevel(byte[] inputBytes, ParserConfiguration.LanguageLevel languageLevel, boolean preprocessUnicodeEscapes) {
 
         ParserConfiguration parserConfiguration = new ParserConfiguration();
         parserConfiguration.setLanguageLevel(languageLevel);
         parserConfiguration.setAttributeComments(false);
+
+        //Solve bug OJN-28 Error while processing Unicode Escaping
+        parserConfiguration.setPreprocessUnicodeEscapes(preprocessUnicodeEscapes);
 
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(inputBytes);

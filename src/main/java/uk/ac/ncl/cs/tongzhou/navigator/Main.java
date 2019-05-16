@@ -16,28 +16,19 @@ import java.util.Optional;
 
 public class Main<T> {
     public static void main(String[] args) throws Exception {
-//		String fileName1 = "Club.java";
-//		String fileName2 = "TestJava.java";
-//		String fileName3 = "Bar.java";
-//		String testCode = "public class Person {" + "int number;" + "int numberOne = 1;" + "public void testFunction(){"
-//				+ "int i = 1;" + "}" + "};" + "public class B { }";
-//
-//		testParseFromString(testCode);
-//		ParseFromFile.testReadAndParseFromeFile(fileName1);
-//		ModifyFile.testModifyFile(fileName2);
-//		AnalysisSymbol.testAnalysisSymbol(fileName1);
+//        String testCode = "public class Test { char c = '\u005c''; }";
+//        testParseFromString(testCode);
+
         System.out.println("Start parsing the full repository on " + new Date());
         RepositoryWalker.main(args);
         System.out.println("Finish parsing the full repository on " + new Date());
     }
 
     private static void testParseFromString(String code) throws Exception {
-        CompilationUnit compilationUnit = StaticJavaParser.parse("class A { }");
-        CompilationUnit compilationUnit2 = StaticJavaParser.parse(code);
-        Optional<ClassOrInterfaceDeclaration> classA = compilationUnit.getClassByName("A");
+        StaticJavaParser.getConfiguration().setPreprocessUnicodeEscapes(true);
+        CompilationUnit compilationUnit = StaticJavaParser.parse(code);
+        Optional<ClassOrInterfaceDeclaration> classA = compilationUnit.getClassByName("Test");
         System.out.println(classA.toString());
-        Optional<ClassOrInterfaceDeclaration> classPerson = compilationUnit2.getClassByName("Person");
-        System.out.println(classPerson.toString());
 
     }
 }
