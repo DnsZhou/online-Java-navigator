@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.util.Date;
+import java.io.File;
 import java.util.Optional;
 
 /**
@@ -15,13 +16,17 @@ import java.util.Optional;
  */
 
 public class Main<T> {
+    static String SLASH_TAG = File.separator;
+
     public static void main(String[] args) throws Exception {
+        System.out.println("Process Started at " + new Date());
+        RepositoryWalker.processRepository();
+        System.out.println("Process Finished at " + new Date());
+
+
 //        String testCode = "public class Test { char c = '\u005c''; }";
 //        testParseFromString(testCode);
 
-        System.out.println("Start parsing the full repository on " + new Date());
-        RepositoryWalker.main(args);
-        System.out.println("Finish parsing the full repository on " + new Date());
     }
 
     private static void testParseFromString(String code) throws Exception {

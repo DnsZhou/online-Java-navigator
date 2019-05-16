@@ -34,7 +34,7 @@ import java.util.zip.ZipInputStream;
  */
 public class RepositoryWalker {
     static String TARGET_EXTENSION = "java";
-    static int ALL_FILE_AMOUNT = 227021;
+    static int ALL_FILE_AMOUNT = 0;
 
     /**
      * To solve the separator difference between Linux and Windows environment
@@ -44,13 +44,18 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "ErrorDocs");
 
-    public static void main(String[] args) throws Exception {
+    public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
         File inputRepoRootDir = new File("tmp" + SLASH_TAG + "Repository");
 
         // TODO change me to an empty dir where the output will be written
         File outputHtmlRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
 
+        System.out.println("Preprocessing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
+        ALL_FILE_AMOUNT = JarFileScanner.countJavaFiles(inputRepoRootDir);
+        System.out.println("Done. " + ALL_FILE_AMOUNT + " java files found in this repository.");
+
+        System.out.println("== Start Parsing Repository ==");
         RepositoryWalker instance = new RepositoryWalker();
         instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
     }
