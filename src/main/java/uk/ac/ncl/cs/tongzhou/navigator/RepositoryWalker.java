@@ -12,8 +12,12 @@
  */
 package uk.ac.ncl.cs.tongzhou.navigator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -26,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -35,6 +40,8 @@ import java.util.zip.ZipInputStream;
 public class RepositoryWalker {
     static String TARGET_EXTENSION = "java";
     static int ALL_FILE_AMOUNT = 0;
+
+    static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * To solve the separator difference between Linux and Windows environment
@@ -135,6 +142,18 @@ public class RepositoryWalker {
         String outputString = null;
         try {
             CompilationUnit compilationUnit = parseWithFallback(inputBytes);
+
+            JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(new DummyTypeSolver());
+            javaSymbolSolver.inject(compilationUnit);
+            LinkingVisitor linkingVisitor = new LinkingVisitor();
+            linkingVisitor.visit(compilationUnit, javaSymbolSolver);
+
+            List<TypeDeclaration> typeDeclarations = linkingVisitor.getTypeDeclarations();
+            CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations);
+            File jsonFile = null;
+            //objectMapper.writeValue(jsonFile, compilationUnitDecl);
+
+
             switch (TARGET_EXTENSION) {
                 case "html":
                     outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());

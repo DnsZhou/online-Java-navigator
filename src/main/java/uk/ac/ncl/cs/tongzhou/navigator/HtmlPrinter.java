@@ -32,12 +32,41 @@ public class HtmlPrinter extends Printer {
 
         //TODO: print out the type of the node, add
         stringBuilder.append("<span class=\"" + node.getClass().getName() + "\">");
+
+
+        if(node.containsData(LinkingVisitor.LINK_ID)) {
+            stringBuilder.append("<span");
+            stringBuilder.append(" id='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_ID));
+            stringBuilder.append("'");
+            stringBuilder.append(" class='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
+            stringBuilder.append("'>");
+        }
+
+        if(node.containsData(LinkingVisitor.LINK_TO)) {
+            stringBuilder.append("<a");
+            stringBuilder.append(" class='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
+            stringBuilder.append("' href='");
+            stringBuilder.append("http://localhost:8080/resolver?to=");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_TO));
+            stringBuilder.append("'>");
+        }
     }
 
     public void end(Node node) {
 
         if (node instanceof CompilationUnit) {
             stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
+        }
+
+        if(node.containsData(LinkingVisitor.LINK_ID)) {
+            stringBuilder.append("</span>");
+        }
+
+        if(node.containsData(LinkingVisitor.LINK_TO)) {
+            stringBuilder.append("</a>");
         }
     }
 }
