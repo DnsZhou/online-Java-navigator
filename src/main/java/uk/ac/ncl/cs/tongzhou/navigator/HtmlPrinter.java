@@ -40,4 +40,16 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
         }
     }
+
+    @Override
+    public void printToken(JavaToken javaToken, Node node) {
+        stringBuilder.append(replaceHtmlSymbols(javaToken.getText()));
+    }
+
+
+    private String replaceHtmlSymbols(String rawText) {
+        return rawText.replace("&", "&#38;")
+                .replace(">", "&#62;")
+                .replace("<", "&#60;");
+    }
 }
