@@ -4,8 +4,8 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
-import java.util.Date;
 import java.io.File;
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -22,7 +22,6 @@ public class Main<T> {
         System.out.println("Process Started at " + new Date());
         RepositoryWalker.processRepository();
         System.out.println("Process Finished at " + new Date());
-
 
 //        String testCode = "public class Test { char c = '\u005c''; }";
 //        testParseFromString(testCode);

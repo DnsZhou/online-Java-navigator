@@ -27,12 +27,18 @@ public class Printer {
     }
 
     public void printToken(JavaToken javaToken, Node node) {
-        stringBuilder.append(javaToken.getText());
+        stringBuilder.append(replaceHtmlSymbols(javaToken.getText()));
     }
 
     public void begin(Node node) {
     }
 
     public void end(Node node) {
+    }
+
+    private String replaceHtmlSymbols(String rawText) {
+        return rawText.replace("&", "&#38;")
+                .replace(">", "&#62;")
+                .replace("<", "&#60;");
     }
 }
