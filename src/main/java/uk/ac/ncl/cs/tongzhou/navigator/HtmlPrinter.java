@@ -30,8 +30,35 @@ public class HtmlPrinter extends Printer {
                     "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://dnszhou.github.io/assets/css/prettify.css\">\n" +
                     "</head>\n<body>\n<pre class=\"prettyprint linenums\">");
         }
+// <<<<<<< visitor
+
+        //TODO: print out the type of the node, add
+        stringBuilder.append("<span class=\"" + node.getClass().getName() + "\">");
+
+
+        if(node.containsData(LinkingVisitor.LINK_ID)) {
+            stringBuilder.append("<span");
+            stringBuilder.append(" id='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_ID));
+            stringBuilder.append("'");
+            stringBuilder.append(" class='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
+            stringBuilder.append("'>");
+        }
+
+        if(node.containsData(LinkingVisitor.LINK_TO)) {
+            stringBuilder.append("<a");
+            stringBuilder.append(" class='");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
+            stringBuilder.append("' href='");
+            stringBuilder.append("http://localhost:8080/resolver?to=");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_TO));
+            stringBuilder.append("'>");
+        }
+// =======
         if (node instanceof com.github.javaparser.ast.type.ClassOrInterfaceType)
             stringBuilder.append("<a href=\"#\" class=\"" + node.getClass().getName() + "\">");
+// >>>>>>> master
     }
 
     public void end(Node node) {
@@ -40,6 +67,15 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
         }
 
+// <<<<<<< visitor
+        if(node.containsData(LinkingVisitor.LINK_ID)) {
+            stringBuilder.append("</span>");
+        }
+
+        if(node.containsData(LinkingVisitor.LINK_TO)) {
+            stringBuilder.append("</a>");
+        }
+// =======
         if (node instanceof com.github.javaparser.ast.type.ClassOrInterfaceType)
             stringBuilder.append("</a>");
     }
@@ -54,5 +90,6 @@ public class HtmlPrinter extends Printer {
         return rawText.replace("&", "&#38;")
                 .replace(">", "&#62;")
                 .replace("<", "&#60;");
+// >>>>>>> master
     }
 }
