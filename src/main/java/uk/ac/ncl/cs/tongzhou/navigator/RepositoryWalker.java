@@ -38,7 +38,7 @@ import java.util.zip.ZipInputStream;
  * Driver for the parsing and html generation task.
  */
 public class RepositoryWalker {
-    static String TARGET_EXTENSION = "java";
+    static String TARGET_EXTENSION = "html";
     static int ALL_FILE_AMOUNT = 0;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
