@@ -1,21 +1,15 @@
-package uk.ac.ncl.cs.tongzhou.navigator;
+package uk.ac.ncl.cs.tongzhou.navigator.learnning;
 
-import java.io.File;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.utils.CodeGenerationUtils;
+import com.github.javaparser.utils.SourceRoot;
+import uk.ac.ncl.cs.tongzhou.navigator.Main;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.javaparser.resolution.types.ResolvedType;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.utils.CodeGenerationUtils;
-import com.github.javaparser.utils.SourceRoot;
 
 public class ParseFromFile {
 	public static void testReadAndParseFromeFile(String fileName) throws IOException {

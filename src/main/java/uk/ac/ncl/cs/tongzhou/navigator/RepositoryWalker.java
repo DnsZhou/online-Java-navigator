@@ -53,7 +53,7 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "Repository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "testRepository");
 
         // TODO change me to an empty dir where the output will be written
         File outputHtmlRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.

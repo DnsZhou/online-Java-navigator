@@ -1,7 +1,4 @@
-package uk.ac.ncl.cs.tongzhou.navigator;
-
-import java.io.File;
-import java.io.IOException;
+package uk.ac.ncl.cs.tongzhou.navigator.learnning;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -10,6 +7,9 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+
+import java.io.File;
+import java.io.IOException;
 
 public class AnalysisSymbol {
 private String fileName;

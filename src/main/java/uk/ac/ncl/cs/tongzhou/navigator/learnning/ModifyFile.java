@@ -1,6 +1,4 @@
-package uk.ac.ncl.cs.tongzhou.navigator;
-
-import java.nio.file.Paths;
+package uk.ac.ncl.cs.tongzhou.navigator.learnning;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BinaryExpr;
@@ -10,6 +8,9 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
+import uk.ac.ncl.cs.tongzhou.navigator.Main;
+
+import java.nio.file.Paths;
 
 public class ModifyFile {
 	public static void testModifyFile(String fileName) {

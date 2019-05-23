@@ -26,6 +26,10 @@ public class Main<T> {
 //        String testCode = "public class Test { char c = '\u005c''; }";
 //        testParseFromString(testCode);
 
+
+//        JsonTest.testJson();
+
+//        SolverTest.testSolver();
     }
 
     private static void testParseFromString(String code) throws Exception {
