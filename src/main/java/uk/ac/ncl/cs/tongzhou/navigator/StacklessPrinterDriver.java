@@ -13,10 +13,12 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
 import com.github.javaparser.JavaToken;
+import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.DataKey;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.type.UnknownType;
+import com.github.javaparser.ast.visitor.VoidVisitorWithDefaults;
 
 import java.util.*;
 
@@ -38,6 +40,25 @@ public class StacklessPrinterDriver {
 
     public static String print(Node node, Printer printer) {
         StacklessPrinterDriver printerDriver = new StacklessPrinterDriver(printer);
+
+        // kludge for https://github.com/javaparser/javaparser/issues/1601
+        node.accept(new VoidVisitorWithDefaults<Void>() {
+            @Override
+            public void defaultAction(Node n, Void arg) {
+
+                Range range = n.getRange().get();
+
+                for(int i = 0; i < n.getChildNodes().size(); i++)
+                {
+                    n.getChildNodes().get(i).accept(this, null);
+                }
+
+                if(n.getParentNode().isPresent() && range.begin.isBefore(n.getParentNode().get().getRange().get().begin)) {
+                    n.setParentNode(n.getParentNode().get().getParentNode().get());
+                }
+            }
+        }, null);
+
         printerDriver.print(node);
         String out = printer.getPrintout();
         return out;
