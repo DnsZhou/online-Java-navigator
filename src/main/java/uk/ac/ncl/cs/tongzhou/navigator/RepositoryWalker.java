@@ -15,6 +15,8 @@ package uk.ac.ncl.cs.tongzhou.navigator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
@@ -39,7 +41,9 @@ import java.util.zip.ZipInputStream;
  */
 public class RepositoryWalker {
     static String TARGET_EXTENSION = "html";
-    static int ALL_FILE_AMOUNT = 0;
+    static int allFileAmount = 0;
+    static int existFileAmount = 0;
+    static int errorFileAmount = 0;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -49,25 +53,35 @@ public class RepositoryWalker {
     static String SLASH_TAG = File.separator;
 
     // TODO change me to an empty dir where the error output will be written
-    static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "ErrorDocs");
+    static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "testRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
 
         // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("tmp" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
+        File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
+        File outputJsonRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "JsonDocs");
 
         System.out.println("Preprocessing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
-        ALL_FILE_AMOUNT = JarFileScanner.countJavaFiles(inputRepoRootDir);
-        System.out.println("Done. " + ALL_FILE_AMOUNT + " java files found in this repository.");
+        allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
+        System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
         System.out.println("== Start Parsing Repository ==");
         RepositoryWalker instance = new RepositoryWalker();
-        instance.processRepository(inputRepoRootDir, outputHtmlRootDir);
+        instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
+
+        System.out.println("== Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
+        if (existFileAmount > 0) {
+            System.out.println(existFileAmount + " file already exist. ");
+        }
+        if (errorFileAmount > 0) {
+            System.out.println(errorFileAmount + " file got error during the process. ");
+        }
+        System.out.println("==");
     }
 
-    private void processRepository(File inputRepoRootDir, File outputHtmlRootDir) throws IOException {
+    private void processRepository(File inputRepoRootDir, File outputHtmlRootDir, File outputJsonRootDir) throws IOException {
         Files.walkFileTree(inputRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
             int processedFileCount = 0;
             int currentPercentage = 0;
@@ -81,6 +95,9 @@ public class RepositoryWalker {
                             .replace("-sources.jar", "");
                     File targetDir = new File(outputHtmlRootDir, relativePath);
                     Files.createDirectories(targetDir.toPath());
+
+                    File targetJsonDir = new File(outputJsonRootDir, relativePath);
+                    Files.createDirectories(targetJsonDir.toPath());
 
                     /**
                      * To solve the separator problem with regular expression
@@ -102,19 +119,22 @@ public class RepositoryWalker {
 
                             String cuName = zipEntry.getName().replace(".java", "");
                             File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "." + TARGET_EXTENSION));
+                            File outputJsonFile = new File(targetJsonDir, zipEntry.getName().replace(".java", ".json"));
 
                             if (!outputFile.exists()) {
 
+                                outputJsonFile.getParentFile().mkdirs();
                                 outputFile.getParentFile().mkdirs();
 
-                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath());
+                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile);
 
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
                                 }
 
                             } else {
-                                System.out.println("target file exists " + file.toFile().getAbsolutePath() + " " + cuName);
+                                System.out.println("target Html file exists " + file.toFile().getAbsolutePath() + " " + cuName);
+                                existFileAmount++;
                             }
                             printPercentage();
                         }
@@ -127,7 +147,7 @@ public class RepositoryWalker {
 
             private void printPercentage() {
                 this.processedFileCount++;
-                int newPercentage = (processedFileCount * 1000) / ALL_FILE_AMOUNT;
+                int newPercentage = (processedFileCount * 1000) / allFileAmount;
                 if (newPercentage != this.currentPercentage) {
                     this.currentPercentage = newPercentage;
                     System.out.println((double) newPercentage / 10 + "% " + new Date());
@@ -137,11 +157,12 @@ public class RepositoryWalker {
 
     }
 
-    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath) {
+    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile) {
         byte[] bytesOut;
         String outputString = null;
         try {
             CompilationUnit compilationUnit = parseWithFallback(inputBytes);
+            PackageDeclaration packageDeclaration = compilationUnit.getPackageDeclaration().get();
 
             JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(new DummyTypeSolver());
             javaSymbolSolver.inject(compilationUnit);
@@ -149,9 +170,10 @@ public class RepositoryWalker {
             linkingVisitor.visit(compilationUnit, javaSymbolSolver);
 
             List<TypeDeclaration> typeDeclarations = linkingVisitor.getTypeDeclarations();
-            CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations);
-            File jsonFile = null;
-            //objectMapper.writeValue(jsonFile, compilationUnitDecl);
+            List<ImportDeclaration> importDeclarations = linkingVisitor.getImportDeclarations();
+            CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations, importDeclarations, packageDeclaration);
+
+            objectMapper.writeValue(outputJsonFile, compilationUnitDecl);
 
 
             switch (TARGET_EXTENSION) {
@@ -165,8 +187,9 @@ public class RepositoryWalker {
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Throwable e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());
+            errorFileAmount++;
             try {
-                File outputFile = new File(outputErrorFileRootDir.getAbsolutePath(), outputPath.toString());
+                File outputFile = new File(outputErrorFileRootDir.getAbsolutePath(), outputPath.toString().replace(".html", ".java"));
                 outputFile.getParentFile().mkdirs();
                 Files.write(outputFile.toPath(), inputBytes);
             } catch (Exception fe) {

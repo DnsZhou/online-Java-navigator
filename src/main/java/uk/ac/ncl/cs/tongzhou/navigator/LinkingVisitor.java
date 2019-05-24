@@ -19,9 +19,14 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
     public static final DataKey<String> LINK_TO = new DataKey<>() {}; // for origins
 
     private final List<TypeDeclaration> typeDeclarations = new ArrayList<>();
+    private final List<ImportDeclaration> importDeclarations = new ArrayList<>();
 
     public List<TypeDeclaration> getTypeDeclarations() {
         return typeDeclarations;
+    }
+
+    public List<ImportDeclaration> getImportDeclarations() {
+        return importDeclarations;
     }
 
     @Override
@@ -42,6 +47,7 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
 
     @Override
     public void visit(ImportDeclaration node, JavaSymbolSolver javaSymbolSolver) {
+        importDeclarations.add(node);
         // TODO
     }
 
