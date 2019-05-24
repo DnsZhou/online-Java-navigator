@@ -32,8 +32,9 @@ public class HtmlPrinter extends Printer {
         }
 
         //TODO: print out the type of the node, add
-        stringBuilder.append("<span class=\"" + node.getClass().getName() + "\">");
-
+        if (!RepositoryWalker.PRODUCTION_ENV) {
+            stringBuilder.append("<span class=\"" + node.getClass().getName() + "\">");
+        }
 
         if (node.containsData(LinkingVisitor.LINK_ID)) {
             stringBuilder.append("<span");
@@ -58,16 +59,19 @@ public class HtmlPrinter extends Printer {
 
     public void end(Node node) {
 
-        if (node instanceof CompilationUnit) {
-            stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
+        if (node.containsData(LinkingVisitor.LINK_TO)) {
+            stringBuilder.append("</a>");
         }
 
         if (node.containsData(LinkingVisitor.LINK_ID)) {
             stringBuilder.append("</span>");
         }
+        if (!RepositoryWalker.PRODUCTION_ENV) {
+            stringBuilder.append("</span>");
+        }
 
-        if (node.containsData(LinkingVisitor.LINK_TO)) {
-            stringBuilder.append("</a>");
+        if (node instanceof CompilationUnit) {
+            stringBuilder.append("\n</pre>\n<script src=\"https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js\"></script>\n</body>\n</html>");
         }
     }
 

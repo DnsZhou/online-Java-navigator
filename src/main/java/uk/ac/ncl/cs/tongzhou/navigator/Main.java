@@ -4,7 +4,6 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
-import java.io.File;
 import java.util.Date;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import java.util.Optional;
  */
 
 public class Main<T> {
-    static String SLASH_TAG = File.separator;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Process Started at " + new Date());
@@ -30,6 +28,8 @@ public class Main<T> {
 //        JsonTest.testJson();
 
 //        SolverTest.testSolver();
+
+//        UtilTest.testPackgeUseage();
     }
 
     private static void testParseFromString(String code) throws Exception {

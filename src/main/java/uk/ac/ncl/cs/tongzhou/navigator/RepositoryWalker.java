@@ -44,6 +44,7 @@ public class RepositoryWalker {
     static int allFileAmount = 0;
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
+    public static final boolean PRODUCTION_ENV = true;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
