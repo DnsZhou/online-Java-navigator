@@ -45,6 +45,7 @@ public class RepositoryWalker {
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
     public static final boolean PRODUCTION_ENV = true;
+    public static final boolean DEBUG_MODE = false;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -56,30 +57,54 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
+    // The folder for debugging all error java file
+    static File debugRepoRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
+
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
+//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
         File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
 
         // TODO change me to an empty dir where the output will be written
         File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
         File outputJsonRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "JsonDocs");
+        if (DEBUG_MODE) {
+            System.out.println("Debugging error files in " + debugRepoRootDir.toPath());
+            RepositoryWalker instance = new RepositoryWalker();
+            instance.processDebugRepository();
 
-        System.out.println("Preprocessing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
-        allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
-        System.out.println("Done. " + allFileAmount + " java files found in this repository.");
+        } else {
+            System.out.println("Preprocessing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
+            allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
+            System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
-        System.out.println("== Start Parsing Repository ==");
-        RepositoryWalker instance = new RepositoryWalker();
-        instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
+            System.out.println("== Start Parsing Repository ==");
+            RepositoryWalker instance = new RepositoryWalker();
+            instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
 
-        System.out.println("== Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
-        if (existFileAmount > 0) {
-            System.out.println(existFileAmount + " file already exist. ");
+            System.out.println("== Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
+            if (existFileAmount > 0) {
+                System.out.println(existFileAmount + " file already exist. ");
+            }
+            if (errorFileAmount > 0) {
+                System.out.println(errorFileAmount + " file got error during the process. ");
+            }
+            System.out.println("==");
         }
-        if (errorFileAmount > 0) {
-            System.out.println(errorFileAmount + " file got error during the process. ");
-        }
-        System.out.println("==");
+    }
+
+    private void processDebugRepository() throws IOException {
+        File debugOutput = new File(debugRepoRootDir.getPath(), "DebugResult");
+        Files.walkFileTree(debugRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                if (file.toFile().isFile() && file.toFile().getName().endsWith(".java")) {
+                    byte[] inputBytes = Files.readAllBytes(file);
+                    processCompilationUnit(inputBytes, debugOutput.toPath(), debugOutput);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     private void processRepository(File inputRepoRootDir, File outputHtmlRootDir, File outputJsonRootDir) throws IOException {
@@ -163,7 +188,8 @@ public class RepositoryWalker {
         String outputString = null;
         try {
             CompilationUnit compilationUnit = parseWithFallback(inputBytes);
-            PackageDeclaration packageDeclaration = compilationUnit.getPackageDeclaration().get();
+            PackageDeclaration packageDeclaration =
+                    compilationUnit.getPackageDeclaration().isPresent() ? compilationUnit.getPackageDeclaration().get() : new PackageDeclaration();
 
             JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(new DummyTypeSolver());
             javaSymbolSolver.inject(compilationUnit);
