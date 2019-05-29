@@ -57,24 +57,21 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
-    // The folder for debugging all error java file
-    static File debugRepoRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
-
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
+//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
 
         // TODO change me to an empty dir where the output will be written
         File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
         File outputJsonRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "JsonDocs");
         if (DEBUG_MODE) {
-            System.out.println("Debugging error files in " + debugRepoRootDir.toPath());
+            System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
             RepositoryWalker instance = new RepositoryWalker();
             instance.processDebugRepository();
 
         } else {
-            System.out.println("Preprocessing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
+            System.out.println("Analysing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
             allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
             System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
@@ -94,8 +91,8 @@ public class RepositoryWalker {
     }
 
     private void processDebugRepository() throws IOException {
-        File debugOutput = new File(debugRepoRootDir.getPath(), "DebugResult");
-        Files.walkFileTree(debugRepoRootDir.toPath(), new SimpleFileVisitor<Path>() {
+        File debugOutput = new File(outputErrorFileRootDir.getPath(), "DebugResult");
+        Files.walkFileTree(outputErrorFileRootDir.toPath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
                 if (file.toFile().isFile() && file.toFile().getName().endsWith(".java")) {
