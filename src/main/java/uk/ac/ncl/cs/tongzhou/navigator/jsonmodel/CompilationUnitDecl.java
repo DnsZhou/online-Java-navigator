@@ -9,9 +9,11 @@ import java.util.List;
 
 public class CompilationUnitDecl {
 
-    public final TypeDecl[] typeDecls;
-    public final ImportDecl[] importDecls;
-    public final PackageDecl packageDecl;
+    public  TypeDecl[] typeDecls;
+    public  ImportDecl[] importDecls;
+    public  PackageDecl packageDecl;
+
+    public CompilationUnitDecl() {}
 
     public CompilationUnitDecl(List<TypeDeclaration> typeDeclarations, List<ImportDeclaration> importDeclarations, PackageDeclaration packageDeclaration) {
 
