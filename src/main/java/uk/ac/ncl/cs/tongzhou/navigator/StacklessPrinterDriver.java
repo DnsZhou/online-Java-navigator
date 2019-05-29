@@ -46,15 +46,17 @@ public class StacklessPrinterDriver {
             @Override
             public void defaultAction(Node n, Void arg) {
 
-                Range range = n.getRange().get();
+                if (n.getRange().isPresent()) {
+                    Range range = n.getRange().get(); //get the range of current Node, including column and line
 
-                for(int i = 0; i < n.getChildNodes().size(); i++)
-                {
-                    n.getChildNodes().get(i).accept(this, null);
-                }
+                    for (int i = 0; i < n.getChildNodes().size(); i++) { //access every child node and save father node to them
+                        n.getChildNodes().get(i).accept(this, null);
+                    }
 
-                if(n.getParentNode().isPresent() && range.begin.isBefore(n.getParentNode().get().getRange().get().begin)) {
-                    n.setParentNode(n.getParentNode().get().getParentNode().get());
+                    if (n.getParentNode().isPresent() && range.begin.isBefore(n.getParentNode().get().getRange().get().begin)) { //if parentNode of some node exists and parent node has range wider than current Node
+                        var grandparentNode = n.getParentNode().get().getParentNode();
+                        n.setParentNode(n.getParentNode().get().getParentNode().get()); //set grandparent node as its parent node
+                    }
                 }
             }
         }, null);
