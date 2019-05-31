@@ -57,14 +57,18 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
+    // TODO change me to an empty dir where the error output will be written
+    static File outputIndexRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "Index");
+
+    // TODO change me to an empty dir where the output will be written
+    static File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
+    static File outputJsonRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "JsonDocs");
+
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("/home/jhalli/IdeaProjects/personal/sorcerer/repocache/repository");
-//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
+//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
 
-        // TODO change me to an empty dir where the output will be written
-        File outputHtmlRootDir = new File("/home/jhalli/tmp/generated/htdocs"); // expect ~227021 files.
-        File outputJsonRootDir = new File("/home/jhalli/tmp/generated/json");
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
             RepositoryWalker instance = new RepositoryWalker();

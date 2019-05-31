@@ -24,7 +24,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
 
-        assertEquals("/home/jhalli/tmp/htdocs/antlr/antlr/2.7.7.redhat-7/antlr-2.7.7.redhat-7/Token.html" , result);
+        assertEquals(null , result);
 
     }
 }
