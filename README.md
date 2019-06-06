@@ -17,6 +17,13 @@ Thus, this project is aimed to produce a web-based Java code repository navigato
 
 On the other hand, as a web application to be presented, some practical research will also be involved such as deployment and operations at scale, cloud-based environment, so that to put the developed service into production. Also, the research on the Computational linguistics and the mechanism of how the computer understands advanced programming language like JAVA is also included in this project.
 
+## Technology Stack
+Open source repositories that is referenced (or may referenced) by this project:
+  - [Java Parser](https://github.com/javaparser/javaparser)
+  - [Code Prettify](https://github.com/google/code-prettify)
+  - [VUE](https://github.com/vuejs/vue)
+  - [Bootstrap Vue](https://github.com/bootstrap-vue/bootstrap-vue)
+
 ## High-level Design
 
 There are two main stages within this source code navigation system:
