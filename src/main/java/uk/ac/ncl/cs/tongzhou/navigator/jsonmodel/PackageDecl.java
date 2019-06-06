@@ -5,9 +5,17 @@ import com.github.javaparser.ast.PackageDeclaration;
 public class PackageDecl {
     public String name;
 
-    public PackageDecl() {}
+    public PackageDecl() {
+    }
 
     public PackageDecl(final PackageDeclaration packageDeclaration) {
         this.name = packageDeclaration.getNameAsString();
+    }
+
+    @Override
+    public String toString() {
+        return "PackageDecl{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

@@ -20,6 +20,7 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -197,13 +198,6 @@ public class RepositoryWalker {
             LinkingVisitor linkingVisitor = new LinkingVisitor();
             linkingVisitor.visit(compilationUnit, javaSymbolSolver);
 
-            List<TypeDeclaration> typeDeclarations = linkingVisitor.getTypeDeclarations();
-            List<ImportDeclaration> importDeclarations = linkingVisitor.getImportDeclarations();
-            CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations, importDeclarations, packageDeclaration);
-
-            objectMapper.writeValue(outputJsonFile, compilationUnitDecl);
-
-
             switch (TARGET_EXTENSION) {
                 case "html":
                     outputString = StacklessPrinterDriver.print(compilationUnit, new HtmlPrinter());
@@ -212,6 +206,14 @@ public class RepositoryWalker {
                     outputString = StacklessPrinterDriver.print(compilationUnit, new Printer());
                     break;
             }
+
+
+            List<String> typeDeclarations = linkingVisitor.getDeclaredTypes();
+            List<ImportDeclaration> importDeclarations = linkingVisitor.getImportDeclarations();
+            CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations, importDeclarations, packageDeclaration);
+
+            objectMapper.writeValue(outputJsonFile, compilationUnitDecl);
+
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Throwable e) {
             System.out.println("error for " + outputPath.toFile().getAbsolutePath() + " " + e.toString());

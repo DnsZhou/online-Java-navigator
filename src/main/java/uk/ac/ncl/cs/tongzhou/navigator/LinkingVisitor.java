@@ -14,12 +14,18 @@ import java.util.List;
 
 public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
 
-    public static final DataKey<String> LINK_STYLE = new DataKey<>() {};
-    public static final DataKey<String> LINK_ID = new DataKey<>() {}; // for targets
-    public static final DataKey<String> LINK_TO = new DataKey<>() {}; // for origins
+    public static final DataKey<String> LINK_STYLE = new DataKey<>() {
+    };
+    public static final DataKey<String> LINK_ID = new DataKey<>() {
+    }; // for targets
+    public static final DataKey<String> LINK_TO = new DataKey<>() {
+    }; // for origins
 
     private final List<TypeDeclaration> typeDeclarations = new ArrayList<>();
     private final List<ImportDeclaration> importDeclarations = new ArrayList<>();
+
+    private final List<String> declaredTypes = new ArrayList<>();
+    private final List<String> declaredImports = new ArrayList<>();
 
     public List<TypeDeclaration> getTypeDeclarations() {
         return typeDeclarations;
@@ -28,6 +34,15 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
     public List<ImportDeclaration> getImportDeclarations() {
         return importDeclarations;
     }
+
+    public List<String> getDeclaredTypes() {
+        return declaredTypes;
+    }
+
+    public List<String> getDeclaredImports() {
+        return declaredImports;
+    }
+
 
     @Override
     public void visit(ClassOrInterfaceDeclaration node, JavaSymbolSolver javaSymbolSolver) {
@@ -40,6 +55,8 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
         node.setData(LINK_ID, name);
         node.setData(LINK_STYLE, "ClassOrInterfaceDeclaration");
 
+        this.declaredTypes.add(name);
+
         super.visit(node, javaSymbolSolver);
     }
 
@@ -48,7 +65,7 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
     @Override
     public void visit(ImportDeclaration node, JavaSymbolSolver javaSymbolSolver) {
         importDeclarations.add(node);
-        // TODO
+        declaredImports.add(node.getNameAsString());
     }
 
     @Override
