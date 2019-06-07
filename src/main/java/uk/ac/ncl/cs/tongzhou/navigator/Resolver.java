@@ -28,27 +28,33 @@ public class Resolver {
         Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
         if (classpathGAVs != null) {
             Set<String> classpathSet = new HashSet<>(classpathGAVs);
-            candidateSet.retainAll(classpathSet);
+            filterCandidatesByClasspath(candidateSet, classpathSet);
         }
 
         List<ImportDecl> imports = getImports(groupId, artifactId, version, compilationUnit);
         //TODO: filter candidates against imports
 
-        for (String gav : candidateSet) {
+        for (String gavCu : candidateSet) {
 
+            String gav = gavCu.substring(0, gavCu.lastIndexOf(":"));
             //Get all type declarations from the String line in index
             List<TypeDecl> declaredTypes = getAllDeclaredTypes(gav);
 
             System.out.println(declaredTypes);
 
             for (TypeDecl typeDecl : declaredTypes) {
-                if (typeDecl.name.equals(to)) {
+                if (typeDecl.name.substring(typeDecl.name.lastIndexOf(".") + 1, typeDecl.name.length()).equals(to)) {
                     return makePath(gav, typeDecl.name);
                 }
             }
         }
 
         return null;
+    }
+
+    private Set<String> filterCandidatesByClasspath(Set<String> candidateSet, Set<String> classpathSet) {
+        candidateSet.removeIf(candidate -> !classpathSet.contains(candidate.substring(0, candidate.lastIndexOf(':'))));
+        return candidateSet;
     }
 
     public String resolve(String groupId, String artifactId, String version, String compilationUnit, String to) throws IOException {
@@ -61,10 +67,18 @@ public class Resolver {
         String groupId = tokens[0];
         String artifactId = tokens[1];
         String version = tokens[2];
+        String[] cuInfo = type.split("[.]");
+        String pathResult = "";
 
         //Todo: correct it to right location
-        return RepositoryWalker.outputHtmlRootDir + SLASH_TAG + groupId + SLASH_TAG + artifactId + SLASH_TAG
-                + version + SLASH_TAG + artifactId + "-" + version + SLASH_TAG + type + ".html";
+        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH_TAG + groupId + SLASH_TAG + artifactId + SLASH_TAG
+                + version + SLASH_TAG + artifactId + "-" + version);
+        for (String info : cuInfo) {
+            pathResult = pathResult.concat(SLASH_TAG).concat(info);
+        }
+        pathResult = pathResult.concat(".html");
+
+        return pathResult;
     }
 
 
@@ -75,7 +89,6 @@ public class Resolver {
         if (!file.exists())
             return null;
         List<String> gavs = Files.readAllLines(file.toPath());
-
         return gavs;
     }
 

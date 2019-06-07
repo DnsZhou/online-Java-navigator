@@ -19,7 +19,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ANTLRGrammarParseBehavior";
-        String to = "Token";
+        String to = "ActionLexer";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
