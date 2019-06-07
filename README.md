@@ -22,6 +22,7 @@ Open source repositories that is referenced (or may referenced) by this project:
   - [Java Parser](https://github.com/javaparser/javaparser)
   - [Code Prettify](https://github.com/google/code-prettify)
   - [VUE](https://github.com/vuejs/vue)
+  - [Swagger](https://github.com/swagger-api)
   - [Bootstrap Vue](https://github.com/bootstrap-vue/bootstrap-vue)
 
 ## High-level Design
