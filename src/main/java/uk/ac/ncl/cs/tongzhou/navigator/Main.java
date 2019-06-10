@@ -17,9 +17,12 @@ import java.util.Optional;
 public class Main<T> {
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Process Started at " + new Date());
+        var startTime = new Date();
+        System.out.println("Process Started at " + startTime);
         RepositoryWalker.processRepository();
-        System.out.println("Process Finished at " + new Date());
+        var endTime = new Date();
+        System.out.println("Process Finished at " + endTime);
+        System.out.println("Took " + ((double)(endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
 
 //        String testCode = "public class Test { char c = '\u005c''; }";
 //        testParseFromString(testCode);

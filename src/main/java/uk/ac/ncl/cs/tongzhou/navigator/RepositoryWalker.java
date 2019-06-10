@@ -20,6 +20,7 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.GAVIndex;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
 
 import java.io.ByteArrayInputStream;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -45,10 +47,15 @@ public class RepositoryWalker {
     static int allFileAmount = 0;
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
-    public static final boolean PRODUCTION_ENV = true;
+
+    //Switches for TEST use ONLY
+    public static final boolean GENERATE_ID_FOR_ALL = false;
     public static final boolean DEBUG_MODE = false;
+    public static final boolean GENERATE_PACKAGE_INFO = true;
+
 
     static final ObjectMapper objectMapper = new ObjectMapper();
+//    static GAVIndex currentGavIndex;
 
     /**
      * To solve the separator difference between Linux and Windows environment
@@ -102,7 +109,7 @@ public class RepositoryWalker {
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
                 if (file.toFile().isFile() && file.toFile().getName().endsWith(".java")) {
                     byte[] inputBytes = Files.readAllBytes(file);
-                    processCompilationUnit(inputBytes, debugOutput.toPath(), debugOutput);
+                    processCompilationUnit(inputBytes, debugOutput.toPath(), debugOutput, null);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -136,6 +143,9 @@ public class RepositoryWalker {
                     String version = pathTokens[pathTokens.length - 2];
                     String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
                     group = group.replace(SLASH_TAG, ".");
+                    GAVIndex currentGavIndex = new GAVIndex();
+
+                    File packageInfoFile = new File(targetJsonDir.getParent(), "package.json");
 
                     ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.toFile()));
                     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -154,7 +164,7 @@ public class RepositoryWalker {
                                 outputJsonFile.getParentFile().mkdirs();
                                 outputFile.getParentFile().mkdirs();
 
-                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile);
+                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentGavIndex);
 
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
@@ -169,6 +179,8 @@ public class RepositoryWalker {
                         zipEntry = zipInputStream.getNextEntry();
                     }
                     zipInputStream.close();
+                    if (GENERATE_PACKAGE_INFO)
+                        objectMapper.writeValue(packageInfoFile, currentGavIndex);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -185,7 +197,7 @@ public class RepositoryWalker {
 
     }
 
-    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile) {
+    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile, GAVIndex currentGavIndex) {
         byte[] bytesOut;
         String outputString = null;
         try {
@@ -213,6 +225,9 @@ public class RepositoryWalker {
             CompilationUnitDecl compilationUnitDecl = new CompilationUnitDecl(typeDeclarations, importDeclarations, packageDeclaration);
 
             objectMapper.writeValue(outputJsonFile, compilationUnitDecl);
+
+            if (GENERATE_PACKAGE_INFO)
+                currentGavIndex.add(compilationUnitDecl);
 
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Throwable e) {

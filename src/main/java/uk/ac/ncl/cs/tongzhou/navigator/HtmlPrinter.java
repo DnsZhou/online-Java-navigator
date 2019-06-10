@@ -32,7 +32,7 @@ public class HtmlPrinter extends Printer {
         }
 
         //TODO: print out the type of the node, add
-        if (!RepositoryWalker.PRODUCTION_ENV) {
+        if (RepositoryWalker.GENERATE_ID_FOR_ALL) {
             stringBuilder.append("<span class=\"" + node.getClass().getName() + "\">");
         }
 
@@ -66,7 +66,7 @@ public class HtmlPrinter extends Printer {
         if (node.containsData(LinkingVisitor.LINK_ID)) {
             stringBuilder.append("</span>");
         }
-        if (!RepositoryWalker.PRODUCTION_ENV) {
+        if (RepositoryWalker.GENERATE_ID_FOR_ALL) {
             stringBuilder.append("</span>");
         }
 
