@@ -65,7 +65,7 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
-    // TODO change me to an empty dir where the error output will be written
+    // TODO change me to an empty dir where the index output will be written
     static File outputIndexRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "Index");
 
     // TODO change me to an empty dir where the output will be written
@@ -179,7 +179,7 @@ public class RepositoryWalker {
                         zipEntry = zipInputStream.getNextEntry();
                     }
                     zipInputStream.close();
-                    if (GENERATE_PACKAGE_INFO)
+                    if (GENERATE_PACKAGE_INFO && currentGavIndex.compilationUnitDecls != null && currentGavIndex.compilationUnitDecls.length != 0)
                         objectMapper.writeValue(packageInfoFile, currentGavIndex);
                 }
                 return FileVisitResult.CONTINUE;
