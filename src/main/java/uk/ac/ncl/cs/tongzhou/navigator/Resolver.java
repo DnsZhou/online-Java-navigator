@@ -2,8 +2,8 @@ package uk.ac.ncl.cs.tongzhou.navigator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.GAVIndex;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.PackageInfo;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.TypeDecl;
 
 import java.io.File;
@@ -71,7 +71,7 @@ public class Resolver {
         String pathResult = "";
 
         //Todo: correct it to right location
-        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH_TAG + groupId + SLASH_TAG + artifactId + SLASH_TAG
+        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH_TAG + groupId.replace(".", SLASH_TAG) + SLASH_TAG + artifactId + SLASH_TAG
                 + version + SLASH_TAG + artifactId + "-" + version);
         for (String info : cuInfo) {
             pathResult = pathResult.concat(SLASH_TAG).concat(info);
@@ -96,12 +96,19 @@ public class Resolver {
      * Function for same package import
      */
     public List<TypeDecl> getAllDeclaredTypes(String gav) throws IOException {
+        String[] pathTokens = gav.split(":");
 
-        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG + gav.replaceAll(":", SLASH_TAG + SLASH_TAG) + SLASH_TAG + "package.json");
-        GAVIndex gavIndex = objectMapper.readValue(file, GAVIndex.class);
+        String group = pathTokens[pathTokens.length - 3];
+        String artifact = pathTokens[pathTokens.length - 2];
+        String version = pathTokens[pathTokens.length - 1];
+
+        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG
+                + group.replace(".", SLASH_TAG) + SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG
+                + artifact + "-" + version + SLASH_TAG + "package.json");
+        PackageInfo packageInfo = objectMapper.readValue(file, PackageInfo.class);
 
         List<TypeDecl> results = new ArrayList<>();
-        for (CompilationUnitDecl compilationUnitDecl : gavIndex.compilationUnitDecls) {
+        for (CompilationUnitDecl compilationUnitDecl : packageInfo.compilationUnitDecls) {
             for (TypeDecl typeDecl : compilationUnitDecl.typeDecls) {
                 results.add(typeDecl);
             }
@@ -113,17 +120,17 @@ public class Resolver {
 
     private List<ImportDecl> getImports(String groupId, String artifactId, String version, String compilationUnit) throws IOException {
 
-        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG + groupId + SLASH_TAG
+        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG + groupId.replace(".", SLASH_TAG) + SLASH_TAG
                 + artifactId + SLASH_TAG + version + SLASH_TAG + artifactId + "-" + version + SLASH_TAG
                 + compilationUnit.replace(".", SLASH_TAG) + ".json");
         CompilationUnitDecl compilationUnitDecl = objectMapper.readValue(file, CompilationUnitDecl.class);
+        if (compilationUnitDecl.importDecls != null && compilationUnitDecl.importDecls.length > 0) {
 
-        List<ImportDecl> importDeclList = new ArrayList<>(Arrays.asList(compilationUnitDecl.importDecls));
-
-        importDeclList.add(new ImportDecl(compilationUnit.substring(0, compilationUnit.lastIndexOf('.'))));
-
-        return importDeclList;
+            List<ImportDecl> importDeclList = new ArrayList<>(Arrays.asList(compilationUnitDecl.importDecls));
+            importDeclList.add(new ImportDecl(compilationUnit.substring(0, compilationUnit.lastIndexOf('.'))));
+            return importDeclList;
+        }
+        return null;
     }
-
 
 }

@@ -2,7 +2,6 @@ package uk.ac.ncl.cs.tongzhou.navigator.jsonmodel;
 
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +16,10 @@ public class CompilationUnitDecl {
     public CompilationUnitDecl() {
     }
 
+    public CompilationUnitDecl(List<String> typeDeclarations, PackageDeclaration packageDeclaration) {
+        this(typeDeclarations, null, packageDeclaration);
+    }
+
     public CompilationUnitDecl(List<String> typeDeclarations, List<ImportDeclaration> importDeclarations, PackageDeclaration packageDeclaration) {
 
         List<TypeDecl> tempTypeDecls = new ArrayList<>(typeDeclarations.size());
@@ -26,12 +29,14 @@ public class CompilationUnitDecl {
         }
         this.typeDecls = tempTypeDecls.toArray(new TypeDecl[0]);
 
-        List<ImportDecl> tempImportDecls = new ArrayList<>(importDeclarations.size());
-        for (ImportDeclaration importDeclaration : importDeclarations) {
-            ImportDecl importDecl = new ImportDecl(importDeclaration);
-            tempImportDecls.add(importDecl);
+        if (importDeclarations != null) {
+            List<ImportDecl> tempImportDecls = new ArrayList<>(importDeclarations.size());
+            for (ImportDeclaration importDeclaration : importDeclarations) {
+                ImportDecl importDecl = new ImportDecl(importDeclaration);
+                tempImportDecls.add(importDecl);
+            }
+            this.importDecls = tempImportDecls.toArray(new ImportDecl[0]);
         }
-        this.importDecls = tempImportDecls.toArray(new ImportDecl[0]);
 
         this.packageDecl = new PackageDecl(packageDeclaration);
     }

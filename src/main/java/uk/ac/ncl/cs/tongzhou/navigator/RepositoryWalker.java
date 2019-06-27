@@ -17,11 +17,11 @@ import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.GAVIndex;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.IndexType;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.PackageInfo;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.TypeDecl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -47,26 +46,22 @@ public class RepositoryWalker {
     static int allFileAmount = 0;
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
+    static String SLASH_TAG = File.separator;
 
     //Switches for TEST use ONLY
     public static final boolean GENERATE_ID_FOR_ALL = false;
     public static final boolean DEBUG_MODE = false;
     public static final boolean GENERATE_PACKAGE_INFO = true;
 
+    // TODO change me to an empty dir where the index output will be written
+    public static final String INDEX_PATH = "tmp" + SLASH_TAG + "output" + SLASH_TAG + "Index";
 
     static final ObjectMapper objectMapper = new ObjectMapper();
-//    static GAVIndex currentGavIndex;
-
-    /**
-     * To solve the separator difference between Linux and Windows environment
-     */
-    static String SLASH_TAG = File.separator;
 
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
 
-    // TODO change me to an empty dir where the index output will be written
-    static File outputIndexRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "Index");
+    static File outputIndexRootDir = new File(INDEX_PATH);
 
     // TODO change me to an empty dir where the output will be written
     static File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
@@ -74,8 +69,8 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
+//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
@@ -83,15 +78,16 @@ public class RepositoryWalker {
             instance.processDebugRepository();
 
         } else {
+            //Analysis Repository
             System.out.println("Analysing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
             allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
             System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
+            //Parse Repository
             System.out.println("== Start Parsing Repository ==");
             RepositoryWalker instance = new RepositoryWalker();
             instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
-
-            System.out.println("== Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
+            System.out.println("== Parsing Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
             if (existFileAmount > 0) {
                 System.out.println(existFileAmount + " file already exist. ");
             }
@@ -99,6 +95,11 @@ public class RepositoryWalker {
                 System.out.println(errorFileAmount + " file got error during the process. ");
             }
             System.out.println("==");
+
+            //Index Repository
+            System.out.println("== Start Indexing Repository ==");
+            instance.indexRepository();
+            System.out.println("== All process finished ==");
         }
     }
 
@@ -143,9 +144,9 @@ public class RepositoryWalker {
                     String version = pathTokens[pathTokens.length - 2];
                     String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
                     group = group.replace(SLASH_TAG, ".");
-                    GAVIndex currentGavIndex = new GAVIndex();
+                    PackageInfo currentPackageInfo = new PackageInfo();
 
-                    File packageInfoFile = new File(targetJsonDir.getParent(), "package.json");
+                    File packageInfoFile = new File(targetJsonDir, "package.json");
 
                     ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.toFile()));
                     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -164,7 +165,7 @@ public class RepositoryWalker {
                                 outputJsonFile.getParentFile().mkdirs();
                                 outputFile.getParentFile().mkdirs();
 
-                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentGavIndex);
+                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentPackageInfo);
 
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
@@ -179,8 +180,8 @@ public class RepositoryWalker {
                         zipEntry = zipInputStream.getNextEntry();
                     }
                     zipInputStream.close();
-                    if (GENERATE_PACKAGE_INFO && currentGavIndex.compilationUnitDecls != null && currentGavIndex.compilationUnitDecls.length != 0)
-                        objectMapper.writeValue(packageInfoFile, currentGavIndex);
+                    if (GENERATE_PACKAGE_INFO && currentPackageInfo.compilationUnitDecls != null && currentPackageInfo.compilationUnitDecls.length != 0)
+                        objectMapper.writeValue(packageInfoFile, currentPackageInfo);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -197,7 +198,7 @@ public class RepositoryWalker {
 
     }
 
-    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile, GAVIndex currentGavIndex) {
+    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile, PackageInfo currentPackageInfo) {
         byte[] bytesOut;
         String outputString = null;
         try {
@@ -226,8 +227,10 @@ public class RepositoryWalker {
 
             objectMapper.writeValue(outputJsonFile, compilationUnitDecl);
 
-            if (GENERATE_PACKAGE_INFO)
-                currentGavIndex.add(compilationUnitDecl);
+            if (GENERATE_PACKAGE_INFO) {
+                compilationUnitDecl.importDecls = null;
+                currentPackageInfo.add(compilationUnitDecl);
+            }
 
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
         } catch (Throwable e) {
@@ -293,4 +296,47 @@ public class RepositoryWalker {
             return null;
         }
     }
+
+    private void indexRepository() throws IOException {
+        //Todo: scan all the index file in the output/JsonDocs folder and generate index into index/ folder
+        /*
+        Index format:
+        <group>:<artifact>:<version>:<declaration name>
+        eg  antlr:antlr:2.7.7.redhat-7:antlr.actions.cpp.ActionLexer
+         */
+        Files.walkFileTree(outputJsonRootDir.toPath(), new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+
+                //Todo: think about whether change it to a special name
+                if (file.toFile().isFile() && file.toFile().getName().equals("package.json")) {
+                    Files.createDirectories(outputIndexRootDir.toPath());
+                    String relativePath = file.toString()
+                            .replace(outputJsonRootDir.getPath(), "")
+                            .replace(SLASH_TAG + "package.json", "");
+
+                    //To solve the separator problem with regular expression
+                    String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
+
+                    String artifact = pathTokens[pathTokens.length - 3];
+                    String version = pathTokens[pathTokens.length - 2];
+                    String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
+                    group = group.replace(SLASH_TAG, ".");
+                    PackageInfo currentPackageInfo = objectMapper.readValue(file.toFile(), PackageInfo.class);
+                    for (CompilationUnitDecl cuItem : currentPackageInfo.compilationUnitDecls) {
+                        for (TypeDecl typeDecl : cuItem.typeDecls) {
+                            String typeName = typeDecl.name.substring(typeDecl.name.lastIndexOf(".") + 1, typeDecl.name.length());
+                            String gavCuString = group + ":" + artifact + ":" + version + ":" + typeDecl.name;
+                            IndexType.addIndexItem(typeName, gavCuString);
+                        }
+                    }
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        IndexType.generateIndex();
+    }
+
+
 }

@@ -2,15 +2,14 @@ package uk.ac.ncl.cs.tongzhou.navigator.jsonmodel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class GAVIndex {
+public class PackageInfo {
 
     public CompilationUnitDecl[] compilationUnitDecls;
 
     @Override
     public String toString() {
-        return "GAVIndex{" +
+        return "PackageInfo{" +
                 "compilationUnitDecls=" + Arrays.toString(compilationUnitDecls) +
                 '}';
     }
