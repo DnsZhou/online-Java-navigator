@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
+
 /**
  * Driver for the parsing and html generation task.
  */
@@ -46,7 +48,6 @@ public class RepositoryWalker {
     static int allFileAmount = 0;
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
-    static String SLASH_TAG = File.separator;
 
     //Switches for TEST use ONLY
     public static final boolean GENERATE_ID_FOR_ALL = false;
@@ -54,23 +55,23 @@ public class RepositoryWalker {
     public static final boolean GENERATE_PACKAGE_INFO = true;
 
     // TODO change me to an empty dir where the index output will be written
-    public static final String INDEX_PATH = "tmp" + SLASH_TAG + "output" + SLASH_TAG + "Index";
+    public static final String INDEX_PATH = "tmp" + SLASH + "output" + SLASH + "Index";
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     // TODO change me to an empty dir where the error output will be written
-    static File outputErrorFileRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "ErrorDocs");
+    static File outputErrorFileRootDir = new File("tmp" + SLASH + "output" + SLASH + "ErrorDocs");
 
     static File outputIndexRootDir = new File(INDEX_PATH);
 
     // TODO change me to an empty dir where the output will be written
-    static File outputHtmlRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
-    static File outputJsonRootDir = new File("tmp" + SLASH_TAG + "output" + SLASH_TAG + "JsonDocs");
+    static File outputHtmlRootDir = new File("tmp" + SLASH + "output" + SLASH + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
+    static File outputJsonRootDir = new File("tmp" + SLASH + "output" + SLASH + "JsonDocs");
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "Repository");
-//        File inputRepoRootDir = new File("tmp" + SLASH_TAG + "input" + SLASH_TAG + "funcTestRepository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
@@ -138,12 +139,12 @@ public class RepositoryWalker {
                     /**
                      * To solve the separator problem with regular expression
                      */
-                    String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
+                    String[] pathTokens = relativePath.substring(1).split(SLASH.equals("\\") ? "\\\\" : SLASH);
 
                     String artifact = pathTokens[pathTokens.length - 3];
                     String version = pathTokens[pathTokens.length - 2];
-                    String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
-                    group = group.replace(SLASH_TAG, ".");
+                    String group = relativePath.substring(1).replace(SLASH + artifact + SLASH + version + SLASH + artifact + "-" + version, "");
+                    group = group.replace(SLASH, ".");
                     PackageInfo currentPackageInfo = new PackageInfo();
 
                     File packageInfoFile = new File(targetJsonDir, "package.json");
@@ -314,15 +315,15 @@ public class RepositoryWalker {
                     Files.createDirectories(outputIndexRootDir.toPath());
                     String relativePath = file.toString()
                             .replace(outputJsonRootDir.getPath(), "")
-                            .replace(SLASH_TAG + "package.json", "");
+                            .replace(SLASH + "package.json", "");
 
                     //To solve the separator problem with regular expression
-                    String[] pathTokens = relativePath.substring(1).split(SLASH_TAG.equals("\\") ? "\\\\" : SLASH_TAG);
+                    String[] pathTokens = relativePath.substring(1).split(SLASH.equals("\\") ? "\\\\" : SLASH);
 
                     String artifact = pathTokens[pathTokens.length - 3];
                     String version = pathTokens[pathTokens.length - 2];
-                    String group = relativePath.substring(1).replace(SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG + artifact + "-" + version, "");
-                    group = group.replace(SLASH_TAG, ".");
+                    String group = relativePath.substring(1).replace(SLASH + artifact + SLASH + version + SLASH + artifact + "-" + version, "");
+                    group = group.replace(SLASH, ".");
                     PackageInfo currentPackageInfo = objectMapper.readValue(file.toFile(), PackageInfo.class);
                     for (CompilationUnitDecl cuItem : currentPackageInfo.compilationUnitDecls) {
                         for (TypeDecl typeDecl : cuItem.typeDecls) {

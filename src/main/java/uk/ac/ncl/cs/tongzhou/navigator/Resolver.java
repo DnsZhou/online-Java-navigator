@@ -1,38 +1,69 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.PackageInfo;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.TypeDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
+import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
+
+import static uk.ac.ncl.cs.tongzhou.navigator.Util.subStringLastDot;
+
 public class Resolver {
-    static String SLASH_TAG = File.separator;
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     public String resolve(String groupId, String artifactId, String version,
-                          String compilationUnit, String to, List<String> classpathGAVs) throws IOException {
+                          String compilationUnit, String navigateTo, List<String> classpathGAVs) throws IOException {
+        GavCu navigateFromGavCu = new GavCu(groupId, artifactId, version, compilationUnit);
+        GavCu resultGavCu = null;
+
+        /*====Rule 1: Current Type itself*/
+        if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName))) {
+            return makePath(navigateFromGavCu);
+        }
+
+        /*Get information of current Type from GavCu*/
+        CompilationUnitDecl cuDecl = getCompilationUnitDecl(navigateFromGavCu);
+        String packageString = getPackage(cuDecl);
+        List<ImportDecl> imports = getImports(cuDecl);
+        List<TypeDecl> typeDecls = getTypeDecls(cuDecl);
+
+        /*====Rule2: target type is an internal type of current type*/
+        for (TypeDecl typeDecl : typeDecls) {
+            /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
+            if (typeDecl.name.replace(navigateFromGavCu.cuName + ".", "").equals(navigateTo)) {
+                return makePath(navigateFromGavCu);
+            }
+
+            /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
+            if (typeDecl.name.equals(packageString + "." + navigateTo)) {
+                return makePath(navigateFromGavCu);
+            }
+        }
+
 
         /* Find the index file with the type name;*/
-        List<String> gavsContainingMatchingCUs = findGAVsContaining(to);
+        List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateTo);
 
         if (gavsContainingMatchingCUs == null)
             //Todo: return readable message showing that the Type is not found in the system
             return null;
 
+        /*Todo: ask what if current package is not defined in classPath?*/
         Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
-        if (classpathGAVs != null) {
+        if (classpathGAVs != null && classpathGAVs.size() != 0) {
             Set<String> classpathSet = new HashSet<>(classpathGAVs);
             filterCandidatesByClasspath(candidateSet, classpathSet);
         }
 
-        List<ImportDecl> imports = getImports(groupId, artifactId, version, compilationUnit);
-        //TODO: filter candidates against imports
+//        Todo: solve the different priority of Rule 4 and Rule 5
+        /*Rule 4: The specific imported CU, Rule 5: same package CU*/
+        if (imports != null && imports.size() != 0) {
+//            filterCandidatesByImports(candidateSet, imports);
+        }
 
         for (String gavCu : candidateSet) {
 
@@ -40,10 +71,8 @@ public class Resolver {
             //Get all type declarations from the String line in index
             List<TypeDecl> declaredTypes = getAllDeclaredTypes(gav);
 
-            System.out.println(declaredTypes);
-
             for (TypeDecl typeDecl : declaredTypes) {
-                if (typeDecl.name.substring(typeDecl.name.lastIndexOf(".") + 1, typeDecl.name.length()).equals(to)) {
+                if (typeDecl.name.substring(typeDecl.name.lastIndexOf(".") + 1, typeDecl.name.length()).equals(navigateTo)) {
                     return makePath(gav, typeDecl.name);
                 }
             }
@@ -57,28 +86,40 @@ public class Resolver {
         return candidateSet;
     }
 
+    private Set<String> filterCandidatesByImports(Set<String> candidateSet, List<ImportDecl> imports) {
+        candidateSet.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
+        return candidateSet;
+    }
+
     public String resolve(String groupId, String artifactId, String version, String compilationUnit, String to) throws IOException {
         return resolve(groupId, artifactId, version, compilationUnit, to, null);
     }
 
-    private String makePath(String gav, String type) {
-
-        String[] tokens = gav.split(":");
-        String groupId = tokens[0];
-        String artifactId = tokens[1];
-        String version = tokens[2];
-        String[] cuInfo = type.split("[.]");
+    String makePath(GavCu gavCu) {
+        String groupId = gavCu.group;
+        String artifactId = gavCu.artifact;
+        String version = gavCu.version;
+        String[] cuInfo = gavCu.cuName.split("[.]");
         String pathResult = "";
 
-        //Todo: correct it to right location
-        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH_TAG + groupId.replace(".", SLASH_TAG) + SLASH_TAG + artifactId + SLASH_TAG
-                + version + SLASH_TAG + artifactId + "-" + version);
+        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH + groupId.replace(".", SLASH) + SLASH + artifactId + SLASH
+                + version + SLASH + artifactId + "-" + version);
         for (String info : cuInfo) {
-            pathResult = pathResult.concat(SLASH_TAG).concat(info);
+            pathResult = pathResult.concat(SLASH).concat(info);
         }
         pathResult = pathResult.concat(".html");
 
         return pathResult;
+    }
+
+    private String makePath(String gav, String type) {
+        GavCu resultGavCu = new GavCu();
+        String[] tokens = gav.split(":");
+        resultGavCu.group = tokens[0];
+        resultGavCu.artifact = tokens[1];
+        resultGavCu.version = tokens[2];
+        resultGavCu.cuName = type;
+        return makePath(resultGavCu);
     }
 
 
@@ -102,9 +143,9 @@ public class Resolver {
         String artifact = pathTokens[pathTokens.length - 2];
         String version = pathTokens[pathTokens.length - 1];
 
-        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG
-                + group.replace(".", SLASH_TAG) + SLASH_TAG + artifact + SLASH_TAG + version + SLASH_TAG
-                + artifact + "-" + version + SLASH_TAG + "package.json");
+        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH
+                + group.replace(".", SLASH) + SLASH + artifact + SLASH + version + SLASH
+                + artifact + "-" + version + SLASH + "package.json");
         PackageInfo packageInfo = objectMapper.readValue(file, PackageInfo.class);
 
         List<TypeDecl> results = new ArrayList<>();
@@ -117,20 +158,41 @@ public class Resolver {
         return results;
     }
 
+    /*this is the JSON model of the json file for every type*/
+    private CompilationUnitDecl getCompilationUnitDecl(GavCu gavCu) throws IOException {
+        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH + gavCu.group.replace(".", SLASH) + SLASH
+                + gavCu.artifact + SLASH + gavCu.version + SLASH + gavCu.artifact + "-" + gavCu.version + SLASH
+                + gavCu.cuName.replace(".", SLASH) + ".json");
+        return objectMapper.readValue(file, CompilationUnitDecl.class);
 
-    private List<ImportDecl> getImports(String groupId, String artifactId, String version, String compilationUnit) throws IOException {
+    }
 
-        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH_TAG + groupId.replace(".", SLASH_TAG) + SLASH_TAG
-                + artifactId + SLASH_TAG + version + SLASH_TAG + artifactId + "-" + version + SLASH_TAG
-                + compilationUnit.replace(".", SLASH_TAG) + ".json");
-        CompilationUnitDecl compilationUnitDecl = objectMapper.readValue(file, CompilationUnitDecl.class);
-        if (compilationUnitDecl.importDecls != null && compilationUnitDecl.importDecls.length > 0) {
+    private String getPackage(CompilationUnitDecl cuDecl) {
 
-            List<ImportDecl> importDeclList = new ArrayList<>(Arrays.asList(compilationUnitDecl.importDecls));
-            importDeclList.add(new ImportDecl(compilationUnit.substring(0, compilationUnit.lastIndexOf('.'))));
+        if (cuDecl.packageDecl != null) {
+            return cuDecl.packageDecl.name;
+        }
+        return null;
+    }
+
+    private List<ImportDecl> getImports(CompilationUnitDecl cuDecl) {
+        if (cuDecl.importDecls != null && cuDecl.importDecls.length > 0) {
+            List<ImportDecl> importDeclList = new ArrayList<>(Arrays.asList(cuDecl.importDecls));
+
+            //        Todo: solve the different priority of Rule 4 and Rule 5
+            /*Add current package as a default import*/
+            importDeclList.add(new ImportDecl(cuDecl.packageDecl.name));
             return importDeclList;
         }
         return null;
     }
 
+    private List<TypeDecl> getTypeDecls(CompilationUnitDecl cuDecl) {
+
+        if (cuDecl.typeDecls != null && cuDecl.typeDecls.length > 0) {
+            List<TypeDecl> typeDeclList = new ArrayList<>(Arrays.asList(cuDecl.typeDecls));
+            return typeDeclList;
+        }
+        return null;
+    }
 }
