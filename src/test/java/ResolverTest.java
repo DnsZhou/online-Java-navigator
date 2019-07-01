@@ -1,6 +1,5 @@
 import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
-import uk.ac.ncl.cs.tongzhou.navigator.Util;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -58,7 +57,7 @@ public class ResolverTest {
 
         String to = "Alternative";
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
-        System.out.println(result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "Alternative.html", result);
     }
 
     @Test
