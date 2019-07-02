@@ -305,6 +305,7 @@ public class RepositoryWalker {
         <group>:<artifact>:<version>:<declaration name>
         eg  antlr:antlr:2.7.7.redhat-7:antlr.actions.cpp.ActionLexer
          */
+        Files.createDirectories(outputIndexRootDir.toPath());
         Files.walkFileTree(outputJsonRootDir.toPath(), new SimpleFileVisitor<Path>() {
 
             @Override
@@ -312,7 +313,6 @@ public class RepositoryWalker {
 
                 //Todo: think about whether change it to a special name
                 if (file.toFile().isFile() && file.toFile().getName().equals("package.json")) {
-                    Files.createDirectories(outputIndexRootDir.toPath());
                     String relativePath = file.toString()
                             .replace(outputJsonRootDir.getPath(), "")
                             .replace(SLASH + "package.json", "");

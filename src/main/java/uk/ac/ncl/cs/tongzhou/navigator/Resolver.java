@@ -20,26 +20,26 @@ public class Resolver {
         GavCu navigateFromGavCu = new GavCu(groupId, artifactId, version, compilationUnit);
         GavCu resultGavCu = null;
 
+        /*Get information of current Type from GavCu*/
+        CompilationUnitDecl cuDecl = getCompilationUnitDecl(navigateFromGavCu);
+        String navFromPkg = getPackage(cuDecl);
+        List<ImportDecl> navFromImports = getImports(cuDecl);
+        List<TypeDecl> navFromTypeDecls = getTypeDecls(cuDecl);
+
         /*====Rule 1: Current Type itself*/
-        if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName))) {
+        if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName.replace(navFromPkg + ".", "")))) {
             return makePath(navigateFromGavCu);
         }
 
-        /*Get information of current Type from GavCu*/
-        CompilationUnitDecl cuDecl = getCompilationUnitDecl(navigateFromGavCu);
-        String packageString = getPackage(cuDecl);
-        List<ImportDecl> imports = getImports(cuDecl);
-        List<TypeDecl> typeDecls = getTypeDecls(cuDecl);
-
-        /*====Rule2: target type is an internal type of current type*/
-        for (TypeDecl typeDecl : typeDecls) {
+        /*====Rule2: target type is an nested type of current type*/
+        for (TypeDecl typeDecl : navFromTypeDecls) {
             /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
             if (typeDecl.name.replace(navigateFromGavCu.cuName + ".", "").equals(navigateTo)) {
                 return makePath(navigateFromGavCu);
             }
 
             /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
-            if (typeDecl.name.equals(packageString + "." + navigateTo)) {
+            if (typeDecl.name.equals(navFromPkg + "." + navigateTo)) {
                 return makePath(navigateFromGavCu);
             }
         }
@@ -56,39 +56,44 @@ public class Resolver {
         Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
         if (classpathGAVs != null && classpathGAVs.size() != 0) {
             Set<String> classpathSet = new HashSet<>(classpathGAVs);
-            filterCandidatesByClasspath(candidateSet, classpathSet);
+            candidateSet = filterCandidatesByClasspath(candidateSet, classpathSet);
         }
+        Set<String> importFilteredCandidate = null;
 
-//        Todo: solve the different priority of Rule 4 and Rule 5
-        /*Rule 4: The specific imported CU, Rule 5: same package CU*/
-        if (imports != null && imports.size() != 0) {
-//            filterCandidatesByImports(candidateSet, imports);
-        }
-
-        for (String gavCu : candidateSet) {
-
-            String gav = gavCu.substring(0, gavCu.lastIndexOf(":"));
-            //Get all type declarations from the String line in index
-            List<TypeDecl> declaredTypes = getAllDeclaredTypes(gav);
-
-            for (TypeDecl typeDecl : declaredTypes) {
-                if (typeDecl.name.substring(typeDecl.name.lastIndexOf(".") + 1, typeDecl.name.length()).equals(navigateTo)) {
-                    return makePath(gav, typeDecl.name);
-                }
+        /*Rule 3: The specific imported CU*/
+        if (navFromImports != null && navFromImports.size() != 0) {
+            importFilteredCandidate = filterCandidatesByImports(candidateSet, navFromImports);
+            for (String gavCu : importFilteredCandidate) {
+                GavCu candidate = new GavCu(gavCu);
+                return makePath(candidate);
             }
+        }
+
+        /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
+        Set<String> result = new HashSet<>(candidateSet);
+        result.removeIf(candidate -> !substringPkgName(candidate).equals(navFromPkg));
+        if (!result.isEmpty()) {
+            return makePath(result.iterator().next());
         }
 
         return null;
     }
 
-    private Set<String> filterCandidatesByClasspath(Set<String> candidateSet, Set<String> classpathSet) {
-        candidateSet.removeIf(candidate -> !classpathSet.contains(candidate.substring(0, candidate.lastIndexOf(':'))));
-        return candidateSet;
+    private String substringPkgName(String gavCuString) {
+        String typeName = gavCuString.substring(gavCuString.lastIndexOf(":") + 1, gavCuString.length());
+        return typeName.substring(0, typeName.lastIndexOf("."));
     }
 
-    private Set<String> filterCandidatesByImports(Set<String> candidateSet, List<ImportDecl> imports) {
-        candidateSet.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
-        return candidateSet;
+    private Set<String> filterCandidatesByClasspath(final Set<String> candidateSet, final Set<String> classpathSet) {
+        Set<String> resultCandidates = new HashSet<>(candidateSet);
+        resultCandidates.removeIf(candidate -> !classpathSet.contains(candidate.substring(0, candidate.lastIndexOf(':'))));
+        return resultCandidates;
+    }
+
+    private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<ImportDecl> imports) {
+        Set<String> resultCandidates = new HashSet<>(candidateSet);
+        resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
+        return resultCandidates;
     }
 
     public String resolve(String groupId, String artifactId, String version, String compilationUnit, String to) throws IOException {
@@ -112,13 +117,13 @@ public class Resolver {
         return pathResult;
     }
 
-    private String makePath(String gav, String type) {
+    private String makePath(String gavCu) {
         GavCu resultGavCu = new GavCu();
-        String[] tokens = gav.split(":");
+        String[] tokens = gavCu.split(":");
         resultGavCu.group = tokens[0];
         resultGavCu.artifact = tokens[1];
         resultGavCu.version = tokens[2];
-        resultGavCu.cuName = type;
+        resultGavCu.cuName = tokens[3];
         return makePath(resultGavCu);
     }
 
@@ -131,31 +136,6 @@ public class Resolver {
             return null;
         List<String> gavs = Files.readAllLines(file.toPath());
         return gavs;
-    }
-
-    /**
-     * Function for same package import
-     */
-    public List<TypeDecl> getAllDeclaredTypes(String gav) throws IOException {
-        String[] pathTokens = gav.split(":");
-
-        String group = pathTokens[pathTokens.length - 3];
-        String artifact = pathTokens[pathTokens.length - 2];
-        String version = pathTokens[pathTokens.length - 1];
-
-        File file = new File(RepositoryWalker.outputJsonRootDir + SLASH
-                + group.replace(".", SLASH) + SLASH + artifact + SLASH + version + SLASH
-                + artifact + "-" + version + SLASH + "package.json");
-        PackageInfo packageInfo = objectMapper.readValue(file, PackageInfo.class);
-
-        List<TypeDecl> results = new ArrayList<>();
-        for (CompilationUnitDecl compilationUnitDecl : packageInfo.compilationUnitDecls) {
-            for (TypeDecl typeDecl : compilationUnitDecl.typeDecls) {
-                results.add(typeDecl);
-            }
-        }
-
-        return results;
     }
 
     /*this is the JSON model of the json file for every type*/
@@ -178,10 +158,7 @@ public class Resolver {
     private List<ImportDecl> getImports(CompilationUnitDecl cuDecl) {
         if (cuDecl.importDecls != null && cuDecl.importDecls.length > 0) {
             List<ImportDecl> importDeclList = new ArrayList<>(Arrays.asList(cuDecl.importDecls));
-
-            //        Todo: solve the different priority of Rule 4 and Rule 5
-            /*Add current package as a default import*/
-            importDeclList.add(new ImportDecl(cuDecl.packageDecl.name));
+//            importDeclList.add(new ImportDecl(cuDecl.packageDecl.name));
             return importDeclList;
         }
         return null;

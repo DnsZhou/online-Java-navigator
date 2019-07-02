@@ -15,4 +15,13 @@ public class GavCu {
         this.version = version;
         this.cuName = compilationUnit;
     }
+
+    public GavCu(String gavCuString){
+        String[] pathTokens = gavCuString.split(":");
+
+        this.group = pathTokens[0];
+        this.artifact = pathTokens[1];
+        this.version = pathTokens[2];
+        this.cuName = pathTokens[3];
+    }
 }

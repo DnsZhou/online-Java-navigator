@@ -22,24 +22,6 @@ public class Main<T> {
         RepositoryWalker.processRepository();
         var endTime = new Date();
         System.out.println("Process Finished at " + endTime);
-        System.out.println("Took " + ((double)(endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
-
-//        String testCode = "public class Test { char c = '\u005c''; }";
-//        testParseFromString(testCode);
-
-
-//        JsonTest.testJson();
-
-//        SolverTest.testSolver();
-
-//        UtilTest.testPackgeUseage();
-    }
-
-    private static void testParseFromString(String code) throws Exception {
-        StaticJavaParser.getConfiguration().setPreprocessUnicodeEscapes(true);
-        CompilationUnit compilationUnit = StaticJavaParser.parse(code);
-        Optional<ClassOrInterfaceDeclaration> classA = compilationUnit.getClassByName("Test");
-        System.out.println(classA.toString());
-
+        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
     }
 }

@@ -23,26 +23,11 @@ public class ResolverTest {
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
 
     }
 
-    @Test
-    public void testResolveWithNoImport() throws IOException {
-
-        Resolver resolver = new Resolver();
-
-        String groupId = "antlr";
-        String artifactId = "antlr";
-        String version = "2.7.7.redhat-7";
-        String compilationUnit = "antlr.ActionTransInfo";
-        String to = "Vector";
-        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
-
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
-
-    }
 
     @Test
     public void testResolveAny() throws IOException {
@@ -55,11 +40,13 @@ public class ResolverTest {
         String compilationUnit = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String to = "Alternative";
+        String to = "AlternativeElement";
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "Alternative.html", result);
+        System.out.println(result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
     }
 
+    /*Rule 1: Current Type itself within the input CU*/
     @Test
     public void testSelfNavigation() throws IOException {
 
@@ -82,6 +69,7 @@ public class ResolverTest {
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
     }
 
+    /*Rule2: Nested Type within the input context*/
     @Test
     public void testInternalClass() throws IOException {
 
@@ -105,6 +93,46 @@ public class ResolverTest {
 
     }
 
+    /*Rule3: The specific imported Type*/
+    @Test
+    public void testSpecificImportedType() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "antlr";
+        String artifactId = "antlr";
+        String version = "2.7.7.redhat-7";
+        String compilationUnit = "antlr.AlternativeBlock";
+        String to = "Vector";
+        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        System.out.println(result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
+
+    }
+
+
+    /*Rule4: Types from same package*/
+    @Test
+    public void testResolveSamePackageWithoutImport() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "antlr";
+        String artifactId = "antlr";
+        String version = "2.7.7.redhat-7";
+        String compilationUnit = "antlr.AlternativeBlock";
+        String to = "AlternativeElement";
+        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        System.out.println(result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
+
+    }
+
+    /*Rule 4.1 Types defined in same CU*/
     @Test
     public void testSameFileClass() throws IOException {
 
