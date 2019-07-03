@@ -151,4 +151,25 @@ public class ResolverTest {
 
 
     }
+
+    /*Rule 5: on demand import, aka wildcard * import*/
+    @Test
+    public void testWildcardImport() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "antlr";
+        String artifactId = "antlr";
+        String version = "2.7.7.redhat-7";
+        String compilationUnit = "antlr.ActionElement";
+        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+
+        String toSelfType = "ActionLexer";
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, toSelfType, classpath);
+        System.out.println(result1);
+
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "actions" + SLASH + "cpp" + SLASH + "ActionLexer.html", result1);
+
+
+    }
 }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
@@ -58,12 +59,13 @@ public class Resolver {
             Set<String> classpathSet = new HashSet<>(classpathGAVs);
             candidateSet = filterCandidatesByClasspath(candidateSet, classpathSet);
         }
-        Set<String> importFilteredCandidate = null;
 
-        /*Rule 3: The specific imported CU*/
+        /*Todo: fix X.X type for specific single type import*/
+        /*====Rule 3: The specific single type imported Type*/
         if (navFromImports != null && navFromImports.size() != 0) {
-            importFilteredCandidate = filterCandidatesByImports(candidateSet, navFromImports);
-            for (String gavCu : importFilteredCandidate) {
+            List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
+            Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSet, importStringList);
+            for (String gavCu : importFilteredCandidates) {
                 GavCu candidate = new GavCu(gavCu);
                 return makePath(candidate);
             }
@@ -74,6 +76,17 @@ public class Resolver {
         result.removeIf(candidate -> !substringPkgName(candidate).equals(navFromPkg));
         if (!result.isEmpty()) {
             return makePath(result.iterator().next());
+        }
+
+        /*====Rule 5: on demand import, aka wildcard * import*/
+        if (navFromImports != null && navFromImports.size() != 0) {
+            List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
+                    -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
+            Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSet, tryImportDecls);
+            for (String gavCu : ondemandImportFilteredCandidates) {
+                GavCu candidate = new GavCu(gavCu);
+                return makePath(candidate);
+            }
         }
 
         return null;
@@ -90,9 +103,15 @@ public class Resolver {
         return resultCandidates;
     }
 
-    private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<ImportDecl> imports) {
+//    private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<ImportDecl> imports) {
+//        Set<String> resultCandidates = new HashSet<>(candidateSet);
+//        resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
+//        return resultCandidates;
+//    }
+
+    private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<String> imports) {
         Set<String> resultCandidates = new HashSet<>(candidateSet);
-        resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
+        resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
         return resultCandidates;
     }
 
