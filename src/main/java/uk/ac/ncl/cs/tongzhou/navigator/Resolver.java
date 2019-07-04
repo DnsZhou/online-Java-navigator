@@ -17,7 +17,7 @@ public class Resolver {
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     public String resolve(String groupId, String artifactId, String version,
-                          String compilationUnit, String navigateTo, List<String> classpathGAVs) throws IOException {
+                          String from, String compilationUnit, String navigateTo, List<String> classpathGAVs) throws IOException {
         GavCu navigateFromGavCu = new GavCu(groupId, artifactId, version, compilationUnit);
         GavCu resultGavCu = null;
 
@@ -45,56 +45,76 @@ public class Resolver {
             }
         }
 
-
         /* Find the index file with the type name;*/
         List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateTo);
 
-        if (gavsContainingMatchingCUs == null)
-            //Todo: return readable message showing that the Type is not found in the system
-            return null;
+        if (gavsContainingMatchingCUs != null && !gavsContainingMatchingCUs.isEmpty()) {
+            /*Todo: ask what if current package is not defined in classPath?*/
+            Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
+            Set<String> candidateSetWithClassPath = new HashSet<>(candidateSet);
+            if (classpathGAVs != null && classpathGAVs.size() != 0) {
+                Set<String> classpathSet = new HashSet<>(classpathGAVs);
+                candidateSetWithClassPath = filterCandidatesByClasspath(candidateSetWithClassPath, classpathSet);
+            }
 
-        /*Todo: ask what if current package is not defined in classPath?*/
-        Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
-        if (classpathGAVs != null && classpathGAVs.size() != 0) {
-            Set<String> classpathSet = new HashSet<>(classpathGAVs);
-            candidateSet = filterCandidatesByClasspath(candidateSet, classpathSet);
+            /*Todo: fix X.X type for specific single type import*/
+            /*====Rule 3: The specific single type imported Type*/
+            if (navFromImports != null && navFromImports.size() != 0) {
+                List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
+                Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, importStringList);
+                for (String gavCu : importFilteredCandidates) {
+                    GavCu candidate = new GavCu(gavCu);
+                    return makePath(candidate);
+                }
+            }
+
+            /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
+            Set<String> result = new HashSet<>(candidateSetWithClassPath);
+            result.removeIf(candidate -> !substringPkgName(candidate).equals(navFromPkg));
+            if (!result.isEmpty()) {
+                return makePath(result.iterator().next());
+            }
+
+            /*====Rule 5: on demand import, aka wildcard * import*/
+            if (navFromImports != null && navFromImports.size() != 0) {
+                List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
+                        -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
+                Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, tryImportDecls);
+                for (String gavCu : ondemandImportFilteredCandidates) {
+                    GavCu candidate = new GavCu(gavCu);
+                    return makePath(candidate);
+                }
+            }
+
+            /*====Rule 6: Default imported Type: java.lang*/
+            String langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate).equals("java.lang")).findAny().orElse(null);
+            if (langResult != null) {
+                return makePath(langResult);
+            }
         }
-
-        /*Todo: fix X.X type for specific single type import*/
-        /*====Rule 3: The specific single type imported Type*/
-        if (navFromImports != null && navFromImports.size() != 0) {
-            List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
-            Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSet, importStringList);
-            for (String gavCu : importFilteredCandidates) {
-                GavCu candidate = new GavCu(gavCu);
-                return makePath(candidate);
+        /*Todo: think about X.X nested type for Rule 6*/
+        /*Rule 7: Directly referred Type eg: com.google.testClass test = new com.google.testClass()*/
+        String directRefTypeName = navigateTo.substring(navigateTo.lastIndexOf(".") + 1, navigateTo.length());
+        List<String> gavsContainingMatchingCUsForDR = findGAVsContaining(directRefTypeName);
+        if (gavsContainingMatchingCUsForDR != null && !gavsContainingMatchingCUsForDR.isEmpty()) {
+            Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUsForDR);
+            candidateSet.removeIf(candidate -> !substringTypegName(candidate).equals(navigateTo));
+            if (candidateSet.size() > 0) {
+                return makePath(candidateSet.iterator().next());
             }
         }
 
-        /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
-        Set<String> result = new HashSet<>(candidateSet);
-        result.removeIf(candidate -> !substringPkgName(candidate).equals(navFromPkg));
-        if (!result.isEmpty()) {
-            return makePath(result.iterator().next());
-        }
-
-        /*====Rule 5: on demand import, aka wildcard * import*/
-        if (navFromImports != null && navFromImports.size() != 0) {
-            List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
-                    -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
-            Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSet, tryImportDecls);
-            for (String gavCu : ondemandImportFilteredCandidates) {
-                GavCu candidate = new GavCu(gavCu);
-                return makePath(candidate);
-            }
-        }
-
+        //Todo: return readable message showing that the Type is not found in the system
         return null;
     }
 
     private String substringPkgName(String gavCuString) {
-        String typeName = gavCuString.substring(gavCuString.lastIndexOf(":") + 1, gavCuString.length());
+        String typeName = substringTypegName(gavCuString);
         return typeName.substring(0, typeName.lastIndexOf("."));
+    }
+
+    private String substringTypegName(String gavCuString) {
+        return gavCuString.substring(gavCuString.lastIndexOf(":") + 1, gavCuString.length());
     }
 
     private Set<String> filterCandidatesByClasspath(final Set<String> candidateSet, final Set<String> classpathSet) {
@@ -115,7 +135,7 @@ public class Resolver {
         return resultCandidates;
     }
 
-    public String resolve(String groupId, String artifactId, String version, String compilationUnit, String to) throws IOException {
+    public String resolve(String groupId, String artifactId, String version, String compilationUnit, String from, String to) throws IOException {
         return resolve(groupId, artifactId, version, compilationUnit, to, null);
     }
 
@@ -137,13 +157,7 @@ public class Resolver {
     }
 
     private String makePath(String gavCu) {
-        GavCu resultGavCu = new GavCu();
-        String[] tokens = gavCu.split(":");
-        resultGavCu.group = tokens[0];
-        resultGavCu.artifact = tokens[1];
-        resultGavCu.version = tokens[2];
-        resultGavCu.cuName = tokens[3];
-        return makePath(resultGavCu);
+        return makePath(new GavCu(gavCu));
     }
 
 

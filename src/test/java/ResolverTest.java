@@ -19,10 +19,11 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
+        String from = "antlr.AlternativeBlock";
         String to = "Vector";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
 
@@ -38,10 +39,11 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String to = "AlternativeElement";
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
     }
@@ -56,15 +58,16 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String toSelfType = "ActionElement";
-        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, toSelfType, classpath);
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toSelfType, classpath);
         System.out.println(result1);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
 
         String toSelfTypeWithPackage = "antlr.ActionElement";
-        String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, toSelfType, classpath);
+        String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toSelfTypeWithPackage, classpath);
         System.out.println(result2);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
     }
@@ -79,15 +82,16 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String toInternalType1 = "TestInternalClass";
-        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, toInternalType1, classpath);
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toInternalType1, classpath);
         System.out.println(result1);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
 
         String toInternalType2 = "ActionElement.TestInternalClass";
-        String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, toInternalType2, classpath);
+        String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toInternalType2, classpath);
         System.out.println(result2);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result2);
 
@@ -103,10 +107,11 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
+        String from = "antlr.AlternativeBlock";
         String to = "Vector";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
 
@@ -123,10 +128,11 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
+        String from = "antlr.AlternativeBlock";
         String to = "AlternativeElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
 
@@ -142,10 +148,11 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String toSelfType = "TestClassWithinSameFile";
-        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, toSelfType, classpath);
+        String to = "TestClassWithinSameFile";
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
 
@@ -162,10 +169,55 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String toSelfType = "ActionLexer";
-        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, toSelfType, classpath);
+        String to = "ActionLexer";
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        System.out.println(result1);
+
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "actions" + SLASH + "cpp" + SLASH + "ActionLexer.html", result1);
+
+
+    }
+
+    /*Rule 6:  Default imported Type like java.lang */
+    @Test
+    public void testDefaultImportType() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "antlr";
+        String artifactId = "antlr";
+        String version = "2.7.7.redhat-7";
+        String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
+        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+
+        String to = "String";
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        System.out.println(result1);
+
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "net" + SLASH + "java" + SLASH + "openjdk" + SLASH + "java-base" + SLASH + "11.0.1" + SLASH + "java-base-11.0.1" + SLASH + "java" + SLASH + "lang" + SLASH + "String.html", result1);
+
+
+    }
+
+    /*Rule 7:  Directly referred Type eg: com.google.testClass test = new com.google.testClass() */
+    @Test
+    public void testDirectlyReferredType() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "antlr";
+        String artifactId = "antlr";
+        String version = "2.7.7.redhat-7";
+        String compilationUnit = "antlr.ActionElement";
+        String from = "antlr.ActionElement";
+        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+
+        String to = "antlr.actions.cpp.ActionLexer";
+        String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
 
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "actions" + SLASH + "cpp" + SLASH + "ActionLexer.html", result1);
