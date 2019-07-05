@@ -20,10 +20,11 @@ public class ResolverRule4Test {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
+        String from = "antlr.AlternativeBlock";
         String to = "AlternativeElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, from, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
 
@@ -38,10 +39,11 @@ public class ResolverRule4Test {
         String artifactId = "cal10n-api";
         String version = "0.8.1.redhat-1";
         String compilationUnit = "ch.qos.cal10n.verifier.AbstractMessageKeyVerifier";
+        String from = "ch.qos.cal10n.verifier.AbstractMessageKeyVerifier";
         String to = "Cal10nError";
         List<String> classpath = Collections.singletonList("ch.qos.cal10n:cal10n-api:0.8.1.redhat-1");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, from, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "cal10n-api" + SLASH + "0.8.1.redhat-1" + SLASH + "cal10n-api-0.8.1.redhat-1" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "verifier" + SLASH + "Cal10nError.html", result);
 

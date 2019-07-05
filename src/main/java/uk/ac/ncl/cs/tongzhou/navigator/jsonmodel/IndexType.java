@@ -2,8 +2,7 @@ package uk.ac.ncl.cs.tongzhou.navigator.jsonmodel;
 
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +40,17 @@ public class IndexType {
         allIndexTypes.forEach((typeName, indexValue) -> {
             try {
                 File outputFile = new File(outputIndexRootDir, typeName);
-                if (!outputFile.exists()) {
-                    Files.write(outputFile.toPath(), indexValue.convertToString().getBytes("UTF-8"));
-                } else {
-                    System.out.println("target Index file exists " + outputFile.getAbsolutePath() + " " + typeName);
+                if (outputFile.exists()) {
+                    System.out.println("exists");
+//                    outputFile = new File(outputFile, outputFile.getName());
+//                    outputFile.getParentFile().mkdirs();
+//                    Files.write(outputFile.toPath(), indexValue.convertToString().getBytes("UTF-8"));
+//                } else {
                 }
+                Files.write(outputFile.toPath(), indexValue.convertToString().getBytes("UTF-8"));
+//                }
+                /*no need to worry about those duplicate File name, because we use hashMap to store Type names, its
+                Impossible to find two same Type name.*/
             } catch (Exception e) {
                 e.printStackTrace();
             }

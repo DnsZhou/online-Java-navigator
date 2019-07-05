@@ -54,6 +54,8 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("http://localhost:8080/resolver?to=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO));
             stringBuilder.append("'>");
+
+            RepositoryWalker.navigateToListInCurrentCu.add(node.getData(LinkingVisitor.LINK_TO));
         }
     }
 

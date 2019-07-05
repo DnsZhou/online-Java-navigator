@@ -17,7 +17,7 @@ public class Resolver {
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     public String resolve(String groupId, String artifactId, String version,
-                          String from, String compilationUnit, String navigateTo, List<String> classpathGAVs) throws IOException {
+                          String compilationUnit, String navigateFrom, String navigateTo, List<String> classpathGAVs) throws IOException {
         GavCu navigateFromGavCu = new GavCu(groupId, artifactId, version, compilationUnit);
         GavCu resultGavCu = null;
 
@@ -32,18 +32,22 @@ public class Resolver {
             return makePath(navigateFromGavCu);
         }
 
+        /*TODO: Solve @interface type not found in .json file/
         /*====Rule2: target type is an nested type of current type*/
-        for (TypeDecl typeDecl : navFromTypeDecls) {
-            /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
-            if (typeDecl.name.replace(navigateFromGavCu.cuName + ".", "").equals(navigateTo)) {
-                return makePath(navigateFromGavCu);
-            }
+        if (navFromTypeDecls != null && !navFromTypeDecls.isEmpty()) {
+            for (TypeDecl typeDecl : navFromTypeDecls) {
+                /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
+                if (typeDecl.name.replace(navigateFromGavCu.cuName + ".", "").equals(navigateTo)) {
+                    return makePath(navigateFromGavCu);
+                }
 
-            /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
-            if (typeDecl.name.equals(navFromPkg + "." + navigateTo)) {
-                return makePath(navigateFromGavCu);
+                /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
+                if (typeDecl.name.equals(navFromPkg + "." + navigateTo)) {
+                    return makePath(navigateFromGavCu);
+                }
             }
         }
+
 
         /* Find the index file with the type name;*/
         List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateTo);
@@ -52,14 +56,14 @@ public class Resolver {
             /*Todo: ask what if current package is not defined in classPath?*/
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
             Set<String> candidateSetWithClassPath = new HashSet<>(candidateSet);
-            if (classpathGAVs != null && classpathGAVs.size() != 0) {
+            if (classpathGAVs != null && !classpathGAVs.isEmpty()) {
                 Set<String> classpathSet = new HashSet<>(classpathGAVs);
                 candidateSetWithClassPath = filterCandidatesByClasspath(candidateSetWithClassPath, classpathSet);
             }
 
             /*Todo: fix X.X type for specific single type import*/
             /*====Rule 3: The specific single type imported Type*/
-            if (navFromImports != null && navFromImports.size() != 0) {
+            if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
                 Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, importStringList);
                 for (String gavCu : importFilteredCandidates) {
@@ -76,7 +80,7 @@ public class Resolver {
             }
 
             /*====Rule 5: on demand import, aka wildcard * import*/
-            if (navFromImports != null && navFromImports.size() != 0) {
+            if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
                         -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
                 Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, tryImportDecls);
@@ -135,8 +139,8 @@ public class Resolver {
         return resultCandidates;
     }
 
-    public String resolve(String groupId, String artifactId, String version, String compilationUnit, String from, String to) throws IOException {
-        return resolve(groupId, artifactId, version, compilationUnit, to, null);
+    public String resolve(String groupId, String artifactId, String version, String compilationUnit, String navFrom, String navTo) throws IOException {
+        return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, null);
     }
 
     String makePath(GavCu gavCu) {

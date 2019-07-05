@@ -27,14 +27,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -49,10 +49,13 @@ public class RepositoryWalker {
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
 
+    static List<String> navigateToListInCurrentCu;
+
     //Switches for TEST use ONLY
     public static final boolean GENERATE_ID_FOR_ALL = false;
     public static final boolean DEBUG_MODE = false;
     public static final boolean GENERATE_PACKAGE_INFO = true;
+    public static final boolean GENERATE_TEST_CASES = false;
 
     // TODO change me to an empty dir where the index output will be written
     public static final String INDEX_PATH = "tmp" + SLASH + "output" + SLASH + "Index";
@@ -62,6 +65,9 @@ public class RepositoryWalker {
     // TODO change me to an empty dir where the error output will be written
     static File outputErrorFileRootDir = new File("tmp" + SLASH + "output" + SLASH + "ErrorDocs");
 
+    // TODO change me to an empty dir where the test case output will be written
+    public static File outputTestCaseFileRootDir = new File("tmp" + SLASH + "output" + SLASH + "TestCaseDocs");
+
     static File outputIndexRootDir = new File(INDEX_PATH);
 
     // TODO change me to an empty dir where the output will be written
@@ -70,8 +76,8 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
-        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
@@ -81,13 +87,13 @@ public class RepositoryWalker {
         } else {
             //Analysis Repository
             System.out.println("Analysing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
-            allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
+//            allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
             System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
             //Parse Repository
             System.out.println("== Start Parsing Repository ==");
             RepositoryWalker instance = new RepositoryWalker();
-            instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
+//            instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
             System.out.println("== Parsing Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
             if (existFileAmount > 0) {
                 System.out.println(existFileAmount + " file already exist. ");
@@ -111,7 +117,7 @@ public class RepositoryWalker {
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
                 if (file.toFile().isFile() && file.toFile().getName().endsWith(".java")) {
                     byte[] inputBytes = Files.readAllBytes(file);
-                    processCompilationUnit(inputBytes, debugOutput.toPath(), debugOutput, null);
+                    processCompilationUnit(inputBytes, debugOutput.toPath(), debugOutput, null, null);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -146,6 +152,7 @@ public class RepositoryWalker {
                     String group = relativePath.substring(1).replace(SLASH + artifact + SLASH + version + SLASH + artifact + "-" + version, "");
                     group = group.replace(SLASH, ".");
                     PackageInfo currentPackageInfo = new PackageInfo();
+                    String gavString = group + ":" + artifact + ":" + version;
 
                     File packageInfoFile = new File(targetJsonDir, "package.json");
 
@@ -157,23 +164,26 @@ public class RepositoryWalker {
 
                             byte[] inputBytes = zipInputStream.readAllBytes();
 
-                            String cuName = zipEntry.getName().replace(".java", "");
+                            String cuPath = zipEntry.getName().replace(".java", "");
+                            String gavCuString = gavString + ":" + cuPath.replace(SLASH, ".").replace("/", ".");
+
                             File outputFile = new File(targetDir, zipEntry.getName().replace(".java", "." + TARGET_EXTENSION));
                             File outputJsonFile = new File(targetJsonDir, zipEntry.getName().replace(".java", ".json"));
+
 
                             if (!outputFile.exists()) {
 
                                 outputJsonFile.getParentFile().mkdirs();
                                 outputFile.getParentFile().mkdirs();
 
-                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentPackageInfo);
+                                byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentPackageInfo, gavCuString);
 
                                 if (outputBytes != null) {
                                     Files.write(outputFile.toPath(), outputBytes);
                                 }
 
                             } else {
-                                System.out.println("target Html file exists " + file.toFile().getAbsolutePath() + " " + cuName);
+                                System.out.println("target Html file exists " + file.toFile().getAbsolutePath() + " " + cuPath);
                                 existFileAmount++;
                             }
                             printPercentage();
@@ -199,7 +209,8 @@ public class RepositoryWalker {
 
     }
 
-    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile, PackageInfo currentPackageInfo) {
+    private byte[] processCompilationUnit(byte[] inputBytes, Path outputPath, File outputJsonFile, PackageInfo currentPackageInfo, String gavCuString) {
+//        File outputTestCaseFile = new File(outputTestCaseFileRootDir,)
         byte[] bytesOut;
         String outputString = null;
         try {
@@ -211,6 +222,7 @@ public class RepositoryWalker {
             javaSymbolSolver.inject(compilationUnit);
             LinkingVisitor linkingVisitor = new LinkingVisitor();
             linkingVisitor.visit(compilationUnit, javaSymbolSolver);
+            navigateToListInCurrentCu = new ArrayList<>();
 
             switch (TARGET_EXTENSION) {
                 case "html":
@@ -231,6 +243,13 @@ public class RepositoryWalker {
             if (GENERATE_PACKAGE_INFO) {
                 compilationUnitDecl.importDecls = null;
                 currentPackageInfo.add(compilationUnitDecl);
+            }
+
+            if (GENERATE_TEST_CASES) {
+                List<String> gavCuToList = navigateToListInCurrentCu.stream().distinct().map(navTo -> gavCuString.replace(":", ",") + "," + navTo).collect(Collectors.toList());
+                File testCaseFile = new File(outputTestCaseFileRootDir, gavCuString.replace(":", "_") + ".csv");
+                testCaseFile.getParentFile().mkdirs();
+                Files.write(testCaseFile.toPath(), gavCuToList, StandardCharsets.UTF_8);
             }
 
             bytesOut = outputString.getBytes(StandardCharsets.UTF_8);
