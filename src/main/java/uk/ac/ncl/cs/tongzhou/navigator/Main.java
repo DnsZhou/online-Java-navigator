@@ -1,5 +1,10 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
+
 import java.util.Date;
 
 /**
@@ -18,5 +23,17 @@ public class Main<T> {
         var endTime = new Date();
         System.out.println("Process Finished at " + endTime);
         System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
+
+//        Undertow server = Undertow.builder()
+//                .addHttpListener(8080, "localhost")
+//                .setHandler(new HttpHandler() {
+//                    @Override
+//                    public void handleRequest(final HttpServerExchange exchange) throws Exception {
+//                        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+//                        exchange.getResponseSender().send("Hello World");
+//                    }
+//                }).build();
+//        server.start();
+
     }
 }
