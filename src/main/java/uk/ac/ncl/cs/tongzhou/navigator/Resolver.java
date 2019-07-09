@@ -1,7 +1,10 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.*;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.GavCu;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.TypeDecl;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +13,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
-
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.subStringLastDot;
 
 public class Resolver {
@@ -169,8 +171,14 @@ public class Resolver {
     private List<String> findGAVsContaining(String typename) throws IOException {
 
         File file = new File(RepositoryWalker.outputIndexRootDir, typename);
-        if (!file.exists())
+        if (!file.exists()) {
             return null;
+        } else if (!file.getCanonicalFile().getName().equals(file.getName())) {
+            file = new File(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename, typename);
+            if (!file.exists()) {
+                return null;
+            }
+        }
         List<String> gavs = Files.readAllLines(file.toPath());
         return gavs;
     }

@@ -27,9 +27,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,8 +78,8 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
-//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
@@ -87,13 +89,13 @@ public class RepositoryWalker {
         } else {
             //Analysis Repository
             System.out.println("Analysing repository: " + inputRepoRootDir.getAbsolutePath() + "  ... ");
-//            allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
+            allFileAmount = JarFileScanner.countJavaFiles(inputRepoRootDir);
             System.out.println("Done. " + allFileAmount + " java files found in this repository.");
 
             //Parse Repository
             System.out.println("== Start Parsing Repository ==");
             RepositoryWalker instance = new RepositoryWalker();
-//            instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
+            instance.processRepository(inputRepoRootDir, outputHtmlRootDir, outputJsonRootDir);
             System.out.println("== Parsing Completed.\n" + (allFileAmount - existFileAmount - errorFileAmount) + " file processed.");
             if (existFileAmount > 0) {
                 System.out.println(existFileAmount + " file already exist. ");

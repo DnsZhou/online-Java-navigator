@@ -2,12 +2,15 @@ package uk.ac.ncl.cs.tongzhou.navigator.jsonmodel;
 
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
 public class IndexType {
     static Map<String, IndexType> allIndexTypes = new HashMap<String, IndexType>();
@@ -41,14 +44,11 @@ public class IndexType {
             try {
                 File outputFile = new File(outputIndexRootDir, typeName);
                 if (outputFile.exists()) {
-                    System.out.println("exists");
-//                    outputFile = new File(outputFile, outputFile.getName());
-//                    outputFile.getParentFile().mkdirs();
-//                    Files.write(outputFile.toPath(), indexValue.convertToString().getBytes("UTF-8"));
-//                } else {
+                    System.out.println("Duplicate file: " + outputFile.getName() + " saved to folder: @" + outputFile.getName());
+                    outputFile = new File(outputFile.getParentFile().getPath() + SLASH + "@" + outputFile.getName(), outputFile.getName());
+                    outputFile.getParentFile().mkdir();
                 }
                 Files.write(outputFile.toPath(), indexValue.convertToString().getBytes("UTF-8"));
-//                }
                 /*no need to worry about those duplicate File name, because we use hashMap to store Type names, its
                 Impossible to find two same Type name.*/
             } catch (Exception e) {
