@@ -60,7 +60,34 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
         super.visit(node, javaSymbolSolver);
     }
 
-    // TODO Decls for Enums and Annotations...
+    @Override
+    public void visit(AnnotationDeclaration node, JavaSymbolSolver javaSymbolSolver) {
+        typeDeclarations.add(node);
+        ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver.resolveDeclaration(node, ResolvedReferenceTypeDeclaration.class);
+        String name = resolvedReferenceTypeDeclaration.getQualifiedName();
+
+        node.setData(LINK_ID, name);
+        node.setData(LINK_STYLE, "AnnotationDeclaration");
+
+        this.declaredTypes.add(name);
+
+        super.visit(node, javaSymbolSolver);
+
+    }
+
+    @Override
+    public void visit(EnumDeclaration node, JavaSymbolSolver javaSymbolSolver) {
+        typeDeclarations.add(node);
+        ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver.resolveDeclaration(node, ResolvedReferenceTypeDeclaration.class);
+        String name = resolvedReferenceTypeDeclaration.getQualifiedName();
+
+        node.setData(LINK_ID, name);
+        node.setData(LINK_STYLE, "EnumDeclaration");
+
+        this.declaredTypes.add(name);
+
+        super.visit(node, javaSymbolSolver);
+    }
 
     @Override
     public void visit(ImportDeclaration node, JavaSymbolSolver javaSymbolSolver) {
