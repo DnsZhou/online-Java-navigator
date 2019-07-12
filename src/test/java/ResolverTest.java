@@ -19,7 +19,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
-        String from = "antlr.AlternativeBlock";
+        String from = "AlternativeBlock";
         String to = "Vector";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
@@ -35,17 +35,16 @@ public class ResolverTest {
 
         Resolver resolver = new Resolver();
 
-        String groupId = "antlr";
-        String artifactId = "antlr";
-        String version = "2.7.7.redhat-7";
-        String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
-        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
+        String groupId = "ch.qos.cal10n";
+        String artifactId = "cal10n-api";
+        String version = "0.8.1.redhat-1";
+        String compilationUnit = "ch.qos.cal10n.verifier.Cal10nError";
+        String from = "Cal10nError";
 
-        String to = "AlternativeElement";
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        String to = "ErrorType";
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "cal10n-api" + SLASH + "0.8.1.redhat-1" + SLASH + "cal10n-api-0.8.1.redhat-1" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "verifier" + SLASH + "Cal10nError.html", result);
     }
 
     /*Rule 1: Current Type itself within the input CU*/
@@ -58,7 +57,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String toSelfType = "ActionElement";
@@ -82,7 +81,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String toInternalType1 = "TestInternalClass";
@@ -107,7 +106,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
-        String from = "antlr.AlternativeBlock";
+        String from = "AlternativeBlock";
         String to = "Vector";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
@@ -128,7 +127,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.AlternativeBlock";
-        String from = "antlr.AlternativeBlock";
+        String from = "AlternativeBlock";
         String to = "AlternativeElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
@@ -148,7 +147,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String to = "TestClassWithinSameFile";
@@ -169,7 +168,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String to = "ActionLexer";
@@ -191,7 +190,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String to = "String";
@@ -213,7 +212,7 @@ public class ResolverTest {
         String artifactId = "antlr";
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
-        String from = "antlr.ActionElement";
+        String from = "ActionElement";
         List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
 
         String to = "antlr.actions.cpp.ActionLexer";

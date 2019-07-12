@@ -51,11 +51,13 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append(" class='");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
             stringBuilder.append("' href='");
-            stringBuilder.append("http://localhost:8080/resolver?to=");
-            stringBuilder.append(node.getData(LinkingVisitor.LINK_TO));
+            stringBuilder.append("http://localhost:8080/resolver?from=");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navFrom);
+            stringBuilder.append("to=");
+            stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navTo);
             stringBuilder.append("'>");
 
-            RepositoryWalker.navigateToListInCurrentCu.add(node.getData(LinkingVisitor.LINK_TO));
+            RepositoryWalker.linkObjectListInCurrentCu.add(node.getData(LinkingVisitor.LINK_TO));
         }
     }
 

@@ -18,10 +18,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.IndexType;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.PackageInfo;
-import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.TypeDecl;
+import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -51,7 +48,7 @@ public class RepositoryWalker {
     static int existFileAmount = 0;
     static int errorFileAmount = 0;
 
-    static List<String> navigateToListInCurrentCu;
+    static List<LinkObject> linkObjectListInCurrentCu;
 
     //Switches for TEST use ONLY
     public static final boolean GENERATE_ID_FOR_ALL = false;
@@ -224,7 +221,7 @@ public class RepositoryWalker {
             javaSymbolSolver.inject(compilationUnit);
             LinkingVisitor linkingVisitor = new LinkingVisitor();
             linkingVisitor.visit(compilationUnit, javaSymbolSolver);
-            navigateToListInCurrentCu = new ArrayList<>();
+            linkObjectListInCurrentCu = new ArrayList<>();
 
             switch (TARGET_EXTENSION) {
                 case "html":
@@ -248,7 +245,7 @@ public class RepositoryWalker {
             }
 
             if (GENERATE_TEST_CASES) {
-                List<String> gavCuToList = navigateToListInCurrentCu.stream().distinct().map(navTo -> gavCuString.replace(":", ",") + "," + navTo).collect(Collectors.toList());
+                List<String> gavCuToList = linkObjectListInCurrentCu.stream().distinct().map(linkObject -> gavCuString.replace(":", ",") + "," + linkObject.navFrom + "," + linkObject.navTo).collect(Collectors.toList());
                 File testCaseFile = new File(outputTestCaseFileRootDir, gavCuString.replace(":", "_") + ".csv");
                 testCaseFile.getParentFile().mkdirs();
                 Files.write(testCaseFile.toPath(), gavCuToList, StandardCharsets.UTF_8);

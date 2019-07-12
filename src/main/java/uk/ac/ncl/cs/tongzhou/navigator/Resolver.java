@@ -28,6 +28,7 @@ public class Resolver {
         String navFromPkg = getPackage(cuDecl);
         List<ImportDecl> navFromImports = getImports(cuDecl);
         List<TypeDecl> navFromTypeDecls = getTypeDecls(cuDecl);
+        String fullNavFromString = compilationUnit.substring(0, compilationUnit.lastIndexOf(".") + 1) + navigateFrom;
 
         /*====Rule 1: Current Type itself*/
         if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName.replace(navFromPkg + ".", "")))) {
@@ -39,12 +40,12 @@ public class Resolver {
         if (navFromTypeDecls != null && !navFromTypeDecls.isEmpty()) {
             for (TypeDecl typeDecl : navFromTypeDecls) {
                 /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
-                if (typeDecl.name.replace(navigateFromGavCu.cuName + ".", "").equals(navigateTo)) {
+                if (typeDecl.name.replace(fullNavFromString + ".", "").equals(navigateTo)) {
                     return makePath(navigateFromGavCu);
                 }
 
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
-                if (typeDecl.name.equals(navFromPkg + "." + navigateTo)) {
+                if (typeDecl.name.equals(fullNavFromString.substring(0, fullNavFromString.lastIndexOf(".")) + "." + navigateTo)) {
                     return makePath(navigateFromGavCu);
                 }
             }
@@ -128,12 +129,6 @@ public class Resolver {
         resultCandidates.removeIf(candidate -> !classpathSet.contains(candidate.substring(0, candidate.lastIndexOf(':'))));
         return resultCandidates;
     }
-
-//    private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<ImportDecl> imports) {
-//        Set<String> resultCandidates = new HashSet<>(candidateSet);
-//        resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.name.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
-//        return resultCandidates;
-//    }
 
     private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<String> imports) {
         Set<String> resultCandidates = new HashSet<>(candidateSet);
