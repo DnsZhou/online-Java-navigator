@@ -106,6 +106,9 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
 
         SimpleName simpleName = node.getName();
         String fullName = node.getTokenRange().get().toString();
+        if (fullName.contains("<")) {
+            fullName = simpleName.toString();
+        }
         String navFrom = findRelativePath(node);
         LinkObject linkObject = new LinkObject(navFrom, fullName);
         simpleName.setData(LINK_TO, linkObject);

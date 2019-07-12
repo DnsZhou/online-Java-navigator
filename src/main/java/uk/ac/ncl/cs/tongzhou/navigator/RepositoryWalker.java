@@ -54,7 +54,7 @@ public class RepositoryWalker {
     public static final boolean GENERATE_ID_FOR_ALL = false;
     public static final boolean DEBUG_MODE = false;
     public static final boolean GENERATE_PACKAGE_INFO = true;
-    public static final boolean GENERATE_TEST_CASES = false;
+    public static final boolean GENERATE_TEST_CASES = true;
 
     // TODO change me to an empty dir where the index output will be written
     public static final String INDEX_PATH = "tmp" + SLASH + "output" + SLASH + "Index";
@@ -244,8 +244,8 @@ public class RepositoryWalker {
                 currentPackageInfo.add(compilationUnitDecl);
             }
 
-            if (GENERATE_TEST_CASES) {
-                List<String> gavCuToList = linkObjectListInCurrentCu.stream().distinct().map(linkObject -> gavCuString.replace(":", ",") + "," + linkObject.navFrom + "," + linkObject.navTo).collect(Collectors.toList());
+            if (GENERATE_TEST_CASES && linkObjectListInCurrentCu != null && !linkObjectListInCurrentCu.isEmpty()) {
+                List<String> gavCuToList = linkObjectListInCurrentCu.stream().map(linkObject -> gavCuString.replace(":", ",") + "," + linkObject.navFrom + "," + linkObject.navTo).distinct().collect(Collectors.toList());
                 File testCaseFile = new File(outputTestCaseFileRootDir, gavCuString.replace(":", "_") + ".csv");
                 testCaseFile.getParentFile().mkdirs();
                 Files.write(testCaseFile.toPath(), gavCuToList, StandardCharsets.UTF_8);

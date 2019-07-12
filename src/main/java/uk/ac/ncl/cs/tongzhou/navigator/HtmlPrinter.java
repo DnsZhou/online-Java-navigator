@@ -53,7 +53,7 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("' href='");
             stringBuilder.append("http://localhost:8080/resolver?from=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navFrom);
-            stringBuilder.append("to=");
+            stringBuilder.append(",to=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navTo);
             stringBuilder.append("'>");
 
