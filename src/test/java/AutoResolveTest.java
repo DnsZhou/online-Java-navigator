@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -19,6 +20,9 @@ public class AutoResolveTest {
         Files.walkFileTree(RepositoryWalker.outputTestCaseFileRootDir.toPath(), new SimpleFileVisitor<Path>() {
             int errorCount = 0;
             int caseCount = 0;
+            long currentPercentage = 0;
+            long currentProcessedCount = 0;
+            long allFilesCount = getFileSize(RepositoryWalker.outputTestCaseFileRootDir);
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
@@ -45,12 +49,23 @@ public class AutoResolveTest {
                             e.printStackTrace();
                         }
                     }
+                    printPercentage();
                 }
                 return FileVisitResult.CONTINUE;
+            }
+
+            private void printPercentage() {
+                this.currentProcessedCount++;
+                long newPercentage = (currentProcessedCount * 1000) / allFilesCount;
+                if (newPercentage != this.currentPercentage) {
+                    this.currentPercentage = newPercentage;
+                    System.out.println((double) newPercentage / 10 + "% " + new Date());
+                }
             }
         });
         System.out.println(new Date());
     }
+
 
     private String resolveByString(String gavCuTo) throws IOException {
         Resolver resolver = new Resolver();
@@ -63,5 +78,18 @@ public class AutoResolveTest {
         String to = gavCuTokens[5];
         List<String> classpath = null;
         return resolver.resolve(groupId, artifactId, version, compilationUnit, from, to);
+    }
+
+    private static long getFileSize(File f) {
+        long size = 0;
+        File flist[] = f.listFiles();
+        for (int i = 0; i < flist.length; i++) {
+            if (flist[i].isDirectory()) {
+                size = size + getFileSize(flist[i]);
+            } else {
+                size = size + flist[i].length();
+            }
+        }
+        return size;
     }
 }

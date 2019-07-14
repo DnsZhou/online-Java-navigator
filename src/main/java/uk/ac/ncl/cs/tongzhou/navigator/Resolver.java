@@ -16,6 +16,10 @@ import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.subStringLastDot;
 
 public class Resolver {
+
+    // TODO change me to dir where the customized classpath file is
+    static File customizeClassFile = new File("tmp" + SLASH + "input" + SLASH + "classpath");
+
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     public String resolve(String groupId, String artifactId, String version,
@@ -53,7 +57,8 @@ public class Resolver {
 
 
         /* Find the index file with the type name;*/
-        List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateTo);
+        String navigateToTypeName = navigateTo.substring(navigateTo.lastIndexOf(".") + 1, navigateTo.length());
+        List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateToTypeName);
 
         if (gavsContainingMatchingCUs != null && !gavsContainingMatchingCUs.isEmpty()) {
             /*Todo: ask what if current package is not defined in classPath?*/
@@ -69,19 +74,34 @@ public class Resolver {
             if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
                 Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, importStringList);
+                if (importFilteredCandidates.isEmpty()) {
+                    /*====Rule 3.1 nested type for specific imported case*/
+                    if (navigateTo.contains(".")) {
+                        String parentTypeString = navigateTo.substring(0, navigateTo.indexOf("."));
+                        List<String> filteredImportForCandidate = importStringList.stream().filter(imp -> imp.substring(imp.lastIndexOf(".") + 1, imp.length()).equals(parentTypeString)).collect(Collectors.toList());
+                        List<String> candidateImportStrings = filteredImportForCandidate.stream().map(str -> str.substring(0, str.lastIndexOf(".")) + "." + navigateTo).collect(Collectors.toList());
+                        importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, candidateImportStrings);
+                    }
+                }
                 for (String gavCu : importFilteredCandidates) {
                     GavCu candidate = new GavCu(gavCu);
                     return makePath(candidate);
                 }
+
+
             }
+
+
 
             /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
             Set<String> result = new HashSet<>(candidateSetWithClassPath);
-            result.removeIf(candidate -> !substringPkgName(candidate).equals(navFromPkg));
+//            navigateTo
+            result.removeIf(candidate -> substringPkgName(candidate, navigateTo) == null || !substringPkgName(candidate, navigateTo).equals(navFromPkg));
             if (!result.isEmpty()) {
                 return makePath(result.iterator().next());
             }
 
+            /*Todo: fix X.X type for specific single type import*/
             /*====Rule 5: on demand import, aka wildcard * import*/
             if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
@@ -93,19 +113,20 @@ public class Resolver {
                 }
             }
 
+            /*Todo: fix X.X type for specific single type import*/
             /*====Rule 6: Default imported Type: java.lang*/
-            String langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate).equals("java.lang")).findAny().orElse(null);
+            String langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate, navigateTo) != null && substringPkgName(candidate, navigateTo).equals("java.lang")).findAny().orElse(null);
             if (langResult != null) {
                 return makePath(langResult);
             }
         }
-        /*Todo: think about X.X nested type for Rule 6*/
+        /*Todo: fix X.X type for specific single type import*/
         /*Rule 7: Directly referred Type eg: com.google.testClass test = new com.google.testClass()*/
         String directRefTypeName = navigateTo.substring(navigateTo.lastIndexOf(".") + 1, navigateTo.length());
         List<String> gavsContainingMatchingCUsForDR = findGAVsContaining(directRefTypeName);
         if (gavsContainingMatchingCUsForDR != null && !gavsContainingMatchingCUsForDR.isEmpty()) {
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUsForDR);
-            candidateSet.removeIf(candidate -> !substringTypegName(candidate).equals(navigateTo));
+            candidateSet.removeIf(candidate -> !substringTypeName(candidate).equals(navigateTo));
             if (candidateSet.size() > 0) {
                 return makePath(candidateSet.iterator().next());
             }
@@ -115,12 +136,16 @@ public class Resolver {
         return null;
     }
 
-    private String substringPkgName(String gavCuString) {
-        String typeName = substringTypegName(gavCuString);
-        return typeName.substring(0, typeName.lastIndexOf("."));
+    private String substringPkgName(String gavCuString, String navigateTo) {
+        String typeName = substringTypeName(gavCuString);
+        if (!typeName.contains(navigateTo)) {
+            return null;
+        } else {
+            return typeName.replace("." + navigateTo, "");
+        }
     }
 
-    private String substringTypegName(String gavCuString) {
+    private String substringTypeName(String gavCuString) {
         return gavCuString.substring(gavCuString.lastIndexOf(":") + 1, gavCuString.length());
     }
 
@@ -137,6 +162,10 @@ public class Resolver {
     }
 
     public String resolve(String groupId, String artifactId, String version, String compilationUnit, String navFrom, String navTo) throws IOException {
+        if (customizeClassFile.exists()) {
+            List<String> classpathGavs = Files.readAllLines(customizeClassFile.toPath());
+            return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, classpathGavs);
+        }
         return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, null);
     }
 

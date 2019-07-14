@@ -116,6 +116,24 @@ public class ResolverTest {
 
     }
 
+    /*Rule3: The specific imported Type with nested type situation*/
+    @Test
+    public void testSpecificImportedTypeWithNested() throws IOException {
+        Resolver resolver = new Resolver();
+
+        String groupId = "net.java.openjdk";
+        String artifactId = "java-base";
+        String version = "11.0.1";
+        String compilationUnit = "com.sun.crypto.provider.OAEPParameters";
+        String from = "OAEPParameters";
+        String to = "PSource.PSpecified";
+        List<String> classpath = Collections.singletonList("net.java.openjdk:java-base:11.0.1");
+
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        System.out.println(result);
+        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "net" + SLASH + "java" + SLASH + "openjdk" + SLASH + "java-base" + SLASH + "11.0.1" + SLASH + "java-base-11.0.1" + SLASH + "javax" + SLASH + "crypto" + SLASH + "spec" + SLASH + "PSource" + SLASH + "PSpecified.html", result);
+
+    }
 
     /*Rule4: Types from same package*/
     @Test
@@ -134,6 +152,25 @@ public class ResolverTest {
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
         assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
+
+    }
+
+    @Test
+    public void testResolveSamePackageWithoutImport2() throws IOException {
+
+        Resolver resolver = new Resolver();
+
+        String groupId = "ch.qos.cal10n";
+        String artifactId = "cal10n-api";
+        String version = "0.8.1.redhat-1";
+        String compilationUnit = "ch.qos.cal10n.verifier.AbstractMessageKeyVerifier";
+        String from = "ch.qos.cal10n.verifier.AbstractMessageKeyVerifier";
+        String to = "Cal10nError";
+        List<String> classpath = Collections.singletonList("ch.qos.cal10n:cal10n-api:0.8.1.redhat-1");
+
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, from, classpath);
+        System.out.println(result);
+//        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "cal10n-api" + SLASH + "0.8.1.redhat-1" + SLASH + "cal10n-api-0.8.1.redhat-1" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "verifier" + SLASH + "Cal10nError.html", result);
 
     }
 

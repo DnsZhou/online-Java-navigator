@@ -54,7 +54,7 @@ public class RepositoryWalker {
     public static final boolean GENERATE_ID_FOR_ALL = false;
     public static final boolean DEBUG_MODE = false;
     public static final boolean GENERATE_PACKAGE_INFO = true;
-    public static final boolean GENERATE_TEST_CASES = true;
+    public static final boolean GENERATE_TEST_CASES = false;
 
     // TODO change me to an empty dir where the index output will be written
     public static final String INDEX_PATH = "tmp" + SLASH + "output" + SLASH + "Index";
@@ -75,8 +75,8 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
-        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());

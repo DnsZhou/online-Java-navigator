@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
@@ -107,13 +108,18 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
         SimpleName simpleName = node.getName();
         String fullName = node.getTokenRange().get().toString();
         if (fullName.contains("<")) {
-            fullName = simpleName.toString();
+            fullName = fullName.replaceAll("<.*>", "");
         }
         String navFrom = findRelativePath(node);
         LinkObject linkObject = new LinkObject(navFrom, fullName);
         simpleName.setData(LINK_TO, linkObject);
         simpleName.setData(LINK_STYLE, "ClassOrInterfaceType");
 
+    }
+
+    @Override
+    public void visit(TypeParameter node, JavaSymbolSolver javaSymbolSolver) {
+        //Todo: solve the situation for Type Parameters, like "String" in "List<String> testList;"
     }
 
     private String findRelativePath(Node node) {
