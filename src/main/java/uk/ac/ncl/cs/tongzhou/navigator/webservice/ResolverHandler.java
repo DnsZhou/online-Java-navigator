@@ -3,6 +3,8 @@ package uk.ac.ncl.cs.tongzhou.navigator.webservice;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.RedirectHandler;
+import io.undertow.util.Headers;
+import io.undertow.util.StatusCodes;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
 import java.util.Deque;
@@ -21,8 +23,14 @@ public class ResolverHandler implements HttpHandler {
         String cu = params.get("cu").getFirst();
         String from = params.get("from").getFirst();
         String to = params.get("to").getFirst();
-        String result = resolver.resolve(group, artifact, version, cu, from, to);
+        String result = resolver.resolve(group, artifact, version, cu, from, to, null);
         System.out.println(result);
-        new RedirectHandler(ResolverService.HOST_NAME + ":" + ResolverService.PORT + "/repository/" + result).handleRequest(httpServerExchange);
+        httpServerExchange.setStatusCode(StatusCodes.FOUND);
+        httpServerExchange.getResponseHeaders().put(Headers.LOCATION,
+                "/repository/" + result);
+        httpServerExchange.endExchange();
+
+//        httpServerExchange.
+//        new RedirectHandler(ResolverService.HOST_NAME + ":" + ResolverService.PORT + "/repository/" + result).handleRequest(httpServerExchange);
     }
 }

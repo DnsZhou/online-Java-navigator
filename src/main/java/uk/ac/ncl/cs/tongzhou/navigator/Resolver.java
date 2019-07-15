@@ -36,7 +36,7 @@ public class Resolver {
 
         /*====Rule 1: Current Type itself*/
         if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName.replace(navFromPkg + ".", "")))) {
-            return makePath(navigateFromGavCu);
+            return makePath(navigateFromGavCu, null);
         }
 
         /*TODO: Solve @interface type not found in .json file/
@@ -45,12 +45,12 @@ public class Resolver {
             for (TypeDecl typeDecl : navFromTypeDecls) {
                 /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
                 if (typeDecl.name.replace(fullNavFromString + ".", "").equals(navigateTo)) {
-                    return makePath(navigateFromGavCu);
+                    return makePath(navigateFromGavCu, null);
                 }
 
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
                 if (typeDecl.name.equals(fullNavFromString.substring(0, fullNavFromString.lastIndexOf(".")) + "." + navigateTo)) {
-                    return makePath(navigateFromGavCu);
+                    return makePath(navigateFromGavCu, navigateTo);
                 }
             }
         }
@@ -85,7 +85,7 @@ public class Resolver {
                 }
                 for (String gavCu : importFilteredCandidates) {
                     GavCu candidate = new GavCu(gavCu);
-                    return makePath(candidate);
+                    return makePath(candidate, navigateTo);
                 }
 
 
@@ -98,7 +98,7 @@ public class Resolver {
 //            navigateTo
             result.removeIf(candidate -> substringPkgName(candidate, navigateTo) == null || !substringPkgName(candidate, navigateTo).equals(navFromPkg));
             if (!result.isEmpty()) {
-                return makePath(result.iterator().next());
+                return makePath(result.iterator().next(), navigateTo);
             }
 
             /*Todo: fix X.X type for specific single type import*/
@@ -109,7 +109,7 @@ public class Resolver {
                 Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, tryImportDecls);
                 for (String gavCu : ondemandImportFilteredCandidates) {
                     GavCu candidate = new GavCu(gavCu);
-                    return makePath(candidate);
+                    return makePath(candidate, null);
                 }
             }
 
@@ -117,7 +117,7 @@ public class Resolver {
             /*====Rule 6: Default imported Type: java.lang*/
             String langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate, navigateTo) != null && substringPkgName(candidate, navigateTo).equals("java.lang")).findAny().orElse(null);
             if (langResult != null) {
-                return makePath(langResult);
+                return makePath(langResult, null);
             }
         }
         /*Todo: fix X.X type for specific single type import*/
@@ -128,7 +128,7 @@ public class Resolver {
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUsForDR);
             candidateSet.removeIf(candidate -> !substringTypeName(candidate).equals(navigateTo));
             if (candidateSet.size() > 0) {
-                return makePath(candidateSet.iterator().next());
+                return makePath(candidateSet.iterator().next(), null);
             }
         }
 
@@ -169,11 +169,17 @@ public class Resolver {
         return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, null);
     }
 
-    String makePath(GavCu gavCu) {
+    String makePath(GavCu gavCu, String navTo) {
         String groupId = gavCu.group;
         String artifactId = gavCu.artifact;
         String version = gavCu.version;
         String[] cuInfo = gavCu.cuName.split("[.]");
+        String toId = gavCu.cuName;
+        if (navTo != null && navTo.contains(".")) {
+            String actualCu = gavCu.cuName.replace(navTo.substring(navTo.indexOf("."), navTo.length()), "");
+            cuInfo = actualCu.split("[.]");
+            toId = actualCu + "." + navTo.substring(navTo.indexOf(".") + 1, navTo.length());
+        }
         String pathResult = "";
 
         pathResult = pathResult.concat(groupId.replace(".", "/") + "/" + artifactId + "/"
@@ -181,13 +187,14 @@ public class Resolver {
         for (String info : cuInfo) {
             pathResult = pathResult.concat("/").concat(info);
         }
-        pathResult = pathResult.concat(".html");
+        pathResult = pathResult.concat(".html#");
+        pathResult = pathResult.concat(toId);
 
         return pathResult;
     }
 
-    private String makePath(String gavCu) {
-        return makePath(new GavCu(gavCu));
+    private String makePath(String gavCu, String navTo) {
+        return makePath(new GavCu(gavCu), navTo);
     }
 
 
