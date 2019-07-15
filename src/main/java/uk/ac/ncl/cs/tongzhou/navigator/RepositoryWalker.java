@@ -76,8 +76,8 @@ public class RepositoryWalker {
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
-        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
