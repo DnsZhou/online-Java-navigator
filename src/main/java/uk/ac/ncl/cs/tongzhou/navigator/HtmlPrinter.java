@@ -50,10 +50,18 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("<a");
             stringBuilder.append(" class='");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
-            stringBuilder.append("' href='");
-            stringBuilder.append("http://localhost:8080/resolver?from=");
+            stringBuilder.append("' href='http://localhost:8080/resolver?");
+            stringBuilder.append("g=");
+            stringBuilder.append(RepositoryWalker.currentScanningGavCu.group);
+            stringBuilder.append("&a=");
+            stringBuilder.append(RepositoryWalker.currentScanningGavCu.artifact);
+            stringBuilder.append("&v=");
+            stringBuilder.append(RepositoryWalker.currentScanningGavCu.version);
+            stringBuilder.append("&cu=");
+            stringBuilder.append(RepositoryWalker.currentScanningGavCu.cuName);
+            stringBuilder.append("&from=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navFrom);
-            stringBuilder.append(",to=");
+            stringBuilder.append("&to=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navTo);
             stringBuilder.append("'>");
 

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
 public class ResolverTest {
 
@@ -25,7 +24,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "collections" + "/" + "impl" + "/" + "Vector.html", result);
 
     }
 
@@ -44,7 +43,7 @@ public class ResolverTest {
         String to = "ErrorType";
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "cal10n-api" + SLASH + "0.8.1.redhat-1" + SLASH + "cal10n-api-0.8.1.redhat-1" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "verifier" + SLASH + "Cal10nError.html", result);
+        assertEquals("ch" + "/" + "qos" + "/" + "cal10n" + "/" + "cal10n-api" + "/" + "0.8.1.redhat-1" + "/" + "cal10n-api-0.8.1.redhat-1" + "/" + "ch" + "/" + "qos" + "/" + "cal10n" + "/" + "verifier" + "/" + "Cal10nError.html", result);
     }
 
     /*Rule 1: Current Type itself within the input CU*/
@@ -63,12 +62,12 @@ public class ResolverTest {
         String toSelfType = "ActionElement";
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toSelfType, classpath);
         System.out.println(result1);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "ActionElement.html", result1);
 
         String toSelfTypeWithPackage = "antlr.ActionElement";
         String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toSelfTypeWithPackage, classpath);
         System.out.println(result2);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "ActionElement.html", result1);
     }
 
     /*Rule2: Nested Type within the input context*/
@@ -87,12 +86,12 @@ public class ResolverTest {
         String toInternalType1 = "TestInternalClass";
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toInternalType1, classpath);
         System.out.println(result1);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "ActionElement.html", result1);
 
         String toInternalType2 = "ActionElement.TestInternalClass";
         String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, toInternalType2, classpath);
         System.out.println(result2);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result2);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "ActionElement.html", result2);
 
     }
 
@@ -112,7 +111,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "collections" + SLASH + "impl" + SLASH + "Vector.html", result);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "collections" + "/" + "impl" + "/" + "Vector.html", result);
 
     }
 
@@ -131,7 +130,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "net" + SLASH + "java" + SLASH + "openjdk" + SLASH + "java-base" + SLASH + "11.0.1" + SLASH + "java-base-11.0.1" + SLASH + "javax" + SLASH + "crypto" + SLASH + "spec" + SLASH + "PSource" + SLASH + "PSpecified.html", result);
+        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java-base" + "/" + "11.0.1" + "/" + "java-base-11.0.1" + "/" + "javax" + "/" + "crypto" + "/" + "spec" + "/" + "PSource" + "/" + "PSpecified.html", result);
 
     }
 
@@ -151,7 +150,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "AlternativeElement.html", result);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "AlternativeElement.html", result);
 
     }
 
@@ -170,7 +169,7 @@ public class ResolverTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, to, from, classpath);
         System.out.println(result);
-//        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "cal10n-api" + SLASH + "0.8.1.redhat-1" + SLASH + "cal10n-api-0.8.1.redhat-1" + SLASH + "ch" + SLASH + "qos" + SLASH + "cal10n" + SLASH + "verifier" + SLASH + "Cal10nError.html", result);
+//        assertEquals("ch" + "/" + "qos" + "/" + "cal10n" + "/" + "cal10n-api" + "/" + "0.8.1.redhat-1" + "/" + "cal10n-api-0.8.1.redhat-1" + "/" + "ch" + "/" + "qos" + "/" + "cal10n" + "/" + "verifier" + "/" + "Cal10nError.html", result);
 
     }
 
@@ -190,7 +189,7 @@ public class ResolverTest {
         String to = "TestClassWithinSameFile";
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "ActionElement.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "ActionElement.html", result1);
 
 
     }
@@ -212,7 +211,7 @@ public class ResolverTest {
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
 
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "actions" + SLASH + "cpp" + SLASH + "ActionLexer.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "actions" + "/" + "cpp" + "/" + "ActionLexer.html", result1);
 
 
     }
@@ -234,7 +233,7 @@ public class ResolverTest {
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
 
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "net" + SLASH + "java" + SLASH + "openjdk" + SLASH + "java-base" + SLASH + "11.0.1" + SLASH + "java-base-11.0.1" + SLASH + "java" + SLASH + "lang" + SLASH + "String.html", result1);
+        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java-base" + "/" + "11.0.1" + "/" + "java-base-11.0.1" + "/" + "java" + "/" + "lang" + "/" + "String.html", result1);
 
 
     }
@@ -256,7 +255,7 @@ public class ResolverTest {
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
 
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "antlr" + SLASH + "antlr" + SLASH + "2.7.7.redhat-7" + SLASH + "antlr-2.7.7.redhat-7" + SLASH + "antlr" + SLASH + "actions" + SLASH + "cpp" + SLASH + "ActionLexer.html", result1);
+        assertEquals("antlr" + "/" + "antlr" + "/" + "2.7.7.redhat-7" + "/" + "antlr-2.7.7.redhat-7" + "/" + "antlr" + "/" + "actions" + "/" + "cpp" + "/" + "ActionLexer.html", result1);
 
 
     }

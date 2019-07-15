@@ -21,9 +21,10 @@ public class SampleResolveTest {
         String to = "PSource.PSpecified";
         List<String> classpath = Collections.singletonList("net.java.openjdk:java-base:11.0.1");
 
-        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+//        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, null);
         System.out.println(result);
-        assertEquals("tmp" + SLASH + "output" + SLASH + "htmlDocs" + SLASH + "net" + SLASH + "java" + SLASH + "openjdk" + SLASH + "java-base" + SLASH + "11.0.1" + SLASH + "java-base-11.0.1" + SLASH + "javax" + SLASH + "crypto" + SLASH + "spec" + SLASH + "PSource" + SLASH + "PSpecified.html", result);
+        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java-base" + "/" + "11.0.1" + "/" + "java-base-11.0.1" + "/" + "javax" + "/" + "crypto" + "/" + "spec" + "/" + "PSource" + "/" + "PSpecified.html", result);
 
     }
 }

@@ -176,10 +176,10 @@ public class Resolver {
         String[] cuInfo = gavCu.cuName.split("[.]");
         String pathResult = "";
 
-        pathResult = pathResult.concat(RepositoryWalker.outputHtmlRootDir + SLASH + groupId.replace(".", SLASH) + SLASH + artifactId + SLASH
-                + version + SLASH + artifactId + "-" + version);
+        pathResult = pathResult.concat(groupId.replace(".", "/") + "/" + artifactId + "/"
+                + version + "/" + artifactId + "-" + version);
         for (String info : cuInfo) {
-            pathResult = pathResult.concat(SLASH).concat(info);
+            pathResult = pathResult.concat("/").concat(info);
         }
         pathResult = pathResult.concat(".html");
 

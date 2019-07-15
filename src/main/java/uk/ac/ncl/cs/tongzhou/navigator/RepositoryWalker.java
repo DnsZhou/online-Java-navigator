@@ -49,6 +49,7 @@ public class RepositoryWalker {
     static int errorFileAmount = 0;
 
     static List<LinkObject> linkObjectListInCurrentCu;
+    static GavCu currentScanningGavCu;
 
     //Switches for TEST use ONLY
     public static final boolean GENERATE_ID_FOR_ALL = false;
@@ -70,13 +71,13 @@ public class RepositoryWalker {
     static File outputIndexRootDir = new File(INDEX_PATH);
 
     // TODO change me to an empty dir where the output will be written
-    static File outputHtmlRootDir = new File("tmp" + SLASH + "output" + SLASH + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
+    public static File outputHtmlRootDir = new File("tmp" + SLASH + "output" + SLASH + TARGET_EXTENSION + "Docs"); // expect ~227021 files.
     static File outputJsonRootDir = new File("tmp" + SLASH + "output" + SLASH + "JsonDocs");
 
     public static void processRepository() throws Exception {
         // TODO change me to the location of the repository root
-        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
-//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
+//        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "Repository");
+        File inputRepoRootDir = new File("tmp" + SLASH + "input" + SLASH + "funcTestRepository");
 
         if (DEBUG_MODE) {
             System.out.println("Debugging error files in " + outputErrorFileRootDir.toPath());
@@ -174,6 +175,9 @@ public class RepositoryWalker {
 
                                 outputJsonFile.getParentFile().mkdirs();
                                 outputFile.getParentFile().mkdirs();
+
+                                /*Record current GavCu for Visitor to fetch*/
+                                currentScanningGavCu = new GavCu(gavCuString);
 
                                 byte[] outputBytes = processCompilationUnit(inputBytes, outputFile.toPath(), outputJsonFile, currentPackageInfo, gavCuString);
 
