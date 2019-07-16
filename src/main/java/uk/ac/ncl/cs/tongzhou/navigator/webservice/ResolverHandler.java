@@ -16,7 +16,6 @@ public class ResolverHandler implements HttpHandler {
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
         Resolver resolver = new Resolver();
         Map<String, Deque<String>> params = httpServerExchange.getQueryParameters();
-//        Todo: finish fetching the parameter and call resover
         String group = params.get("g").getFirst();
         String artifact = params.get("a").getFirst();
         String version = params.get("v").getFirst();
@@ -29,8 +28,5 @@ public class ResolverHandler implements HttpHandler {
         httpServerExchange.getResponseHeaders().put(Headers.LOCATION,
                 "/repository/" + result);
         httpServerExchange.endExchange();
-
-//        httpServerExchange.
-//        new RedirectHandler(ResolverService.HOST_NAME + ":" + ResolverService.PORT + "/repository/" + result).handleRequest(httpServerExchange);
     }
 }

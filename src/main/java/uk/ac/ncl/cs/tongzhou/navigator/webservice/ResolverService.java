@@ -2,6 +2,7 @@ package uk.ac.ncl.cs.tongzhou.navigator.webservice;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
@@ -23,6 +24,9 @@ public class ResolverService {
 
         HttpHandler resolver = new ResolverHandler();
         pathHandler.addExactPath("/resolver", resolver);
+
+        HttpHandler classpathHandler = new ClasspathHandler();
+        pathHandler.addExactPath("/classpath", new BlockingHandler(classpathHandler));
 
         Undertow server = Undertow.builder()
                 .addHttpListener(PORT, HOST_NAME).setHandler(pathHandler).build();
