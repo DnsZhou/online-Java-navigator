@@ -169,7 +169,11 @@ public class Resolver {
         return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, null);
     }
 
-    String makePath(GavCu gavCu, String navTo) {
+    public List<String> findGavCusByTypeName(String typeName) throws IOException {
+        return findGAVsContaining(typeName);
+    }
+
+    private String makePath(GavCu gavCu, String navTo) {
         String groupId = gavCu.group;
         String artifactId = gavCu.artifact;
         String version = gavCu.version;

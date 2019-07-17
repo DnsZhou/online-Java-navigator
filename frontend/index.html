@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Online Java Navigator</title>
+    <link rel="stylesheet" href="./css/index.css">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://kit.fontawesome.com/1a89ba7cc1.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Online Java Navigator</a>
+
+            <div class="collapse navbar-collapse justify-content-end">
+                <!-- <input type="text" class="form-control" placeholder="Input Type Name..."
+                        aria-label="find any Type within the repository" aria-describedby="type-search-button"
+                        v-model.trim="typeSearchQuery" list="classpathResults" @input="findGavCusByType"
+                        autocomplete="off" autocapitalize="off" autocorrect="off">
+                    <datalist id="classpathResults">
+                        <div v-for="gavCu in typeSearchResults">
+                            <option v-bind:value="gavCu">
+                                <div @click="navigateByGavCu()">{{ gavCu }}</div>
+                            </option>
+                        </div>
+                    </datalist> -->
+                <div class="btn-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">Search Type
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="true">
+                        {{currentType}}&nbsp;<i class="fas fa-search"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div class="container">
+                            <input type="text" class="form-control" placeholder="Type Name..."
+                                aria-label="find any Type within the repository" aria-describedby="type-search-button"
+                                v-model.trim="typeSearchQuery" list="classpathResults" @input="findGavCusByType"
+                                autocomplete="off" autocapitalize="off" autocorrect="off">
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="" v-for="gavCu in typeSearchResults"
+                                @click="navigateByGavCu(gavCu)">{{ gavCu }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <div>
+                <!-- <classpath-panel></classpath-panel> -->
+                <iframe id="codeFrame" v-bind:src="currentUrl"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/main.js"></script>
+</body>
+
+</html>
