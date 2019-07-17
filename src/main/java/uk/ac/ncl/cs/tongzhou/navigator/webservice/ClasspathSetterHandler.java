@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
-public class ClasspathHandler implements HttpHandler {
+public class ClasspathSetterHandler implements HttpHandler {
     // TODO change me to an empty dir where the error output will be written
-    static File outputCustomizeClasspathRootDir = new File("tmp" + SLASH + "output" + SLASH + "CustomizeClasspath");
+    public static File outputCustomizeClasspathRootDir = new File("tmp" + SLASH + "output" + SLASH + "CustomizeClasspath");
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
