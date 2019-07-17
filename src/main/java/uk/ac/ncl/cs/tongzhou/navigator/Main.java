@@ -1,8 +1,6 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
-import uk.ac.ncl.cs.tongzhou.navigator.webservice.ResolverService;
-
-import java.util.Date;
+import uk.ac.ncl.cs.tongzhou.navigator.webservice.WebService;
 
 /**
  * s
@@ -21,6 +19,6 @@ public class Main<T> {
 //        System.out.println("Process Finished at " + endTime);
 //        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
 
-        ResolverService.runServer();
+        WebService.runServer();
     }
 }

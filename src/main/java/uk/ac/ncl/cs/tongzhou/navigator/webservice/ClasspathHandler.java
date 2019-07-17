@@ -3,6 +3,7 @@ package uk.ac.ncl.cs.tongzhou.navigator.webservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +25,8 @@ public class ClasspathHandler implements HttpHandler {
         File customizeClasspath = new File(outputCustomizeClasspathRootDir.getPath(), jsonHash + ".json");
         customizeClasspath.getParentFile().mkdirs();
         Files.write(customizeClasspath.toPath(), jsonBytes);
-
+        httpServerExchange.getResponseHeaders().add(Headers.CONTENT_TYPE, "application/json");
+        httpServerExchange.getResponseSender().send("{\"classpath-hash\": \"" + jsonHash + "\"}");
     }
 
     private String getString(InputStream is) throws IOException {

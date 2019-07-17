@@ -15,7 +15,7 @@ package uk.ac.ncl.cs.tongzhou.navigator;
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import uk.ac.ncl.cs.tongzhou.navigator.webservice.ResolverService;
+import uk.ac.ncl.cs.tongzhou.navigator.webservice.WebService;
 
 /**
  * A generic printer that recreates the original source file content.
@@ -51,7 +51,7 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append("<a");
             stringBuilder.append(" class='");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
-            stringBuilder.append("' href='http://" + ResolverService.HOST_NAME + ":" + ResolverService.PORT + "/resolver?");
+            stringBuilder.append("' href='http://" + WebService.HOST_NAME + ":" + WebService.PORT + "/resolver?");
             stringBuilder.append("g=");
             stringBuilder.append(RepositoryWalker.currentScanningGavCu.group);
             stringBuilder.append("&a=");

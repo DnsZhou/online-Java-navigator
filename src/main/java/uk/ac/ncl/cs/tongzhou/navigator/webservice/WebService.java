@@ -10,7 +10,7 @@ import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 
 import java.io.File;
 
-public class ResolverService {
+public class WebService {
     //    public static String HOST_NAME = "ec2-35-178-134-147.eu-west-2.compute.amazonaws.com";
     public static String HOST_NAME = "localhost";
     public static int PORT = 8080;
