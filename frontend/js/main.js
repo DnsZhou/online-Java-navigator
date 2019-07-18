@@ -154,7 +154,21 @@ new Vue({
                 return unescape(arr[2]);
             }
             return null;
-        }
+        },
+        frameBack() {
+            var codeFrameObj = document.getElementById("codeFrame");
+            var codeFrame = (codeFrameObj.contentWindow || codeFrameObj.contentDocument)
+            if (codeFrame) {
+                codeFrame.history.back();
+            }
+        },
+        frameForward() {
+            var codeFrameObj = document.getElementById("codeFrame");
+            var codeFrame = (codeFrameObj.contentWindow || codeFrameObj.contentDocument)
+            if (codeFrame) {
+                codeFrame.history.forward();
+            }
+        },
     }
 });
 
