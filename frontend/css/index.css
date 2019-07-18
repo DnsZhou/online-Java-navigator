@@ -2,3 +2,51 @@ iframe {
     width: -webkit-fill-available;
     height: -webkit-fill-available;
 }
+#search-bar {
+    margin-top: 15%;
+}
+
+.search-option {
+    color: #293c50;
+    background: #f5f6f7;
+    margin-bottom: 2px;
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+.search-option:hover{
+    background-color: rgb(214, 237, 255);
+}
+
+.search-dropdown {
+    position: absolute; 
+    top: 100%; 
+    z-index: 100; 
+    left: auto; 
+    right: 0px; 
+    display: true;
+    width: inherit;
+    line-height: 45px;
+}
+.search-dropdown a:hover{
+    text-decoration: none;
+}
+.search-notice {
+    cursor: default;
+}
+
+#hide-all
+ {
+   position: fixed;
+   left: 0px; 
+   right: 0px; 
+   top: 0px; 
+   bottom: 0px; 
+   background-color: white;
+   z-index: 99; /* Higher than anything else in the document */
+
+ }
+ 
+ .hidden{
+    visibility:hidden;
+ }
