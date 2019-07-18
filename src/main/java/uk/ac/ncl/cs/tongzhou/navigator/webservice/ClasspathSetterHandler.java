@@ -26,7 +26,7 @@ public class ClasspathSetterHandler implements HttpHandler {
         customizeClasspath.getParentFile().mkdirs();
         Files.write(customizeClasspath.toPath(), jsonBytes);
         httpServerExchange.getResponseHeaders().add(Headers.CONTENT_TYPE, "application/json");
-        httpServerExchange.getResponseSender().send("{\"classpath-hash\": \"" + jsonHash + "\"}");
+        httpServerExchange.getResponseSender().send("{\"classpathHash\": \"" + jsonHash + "\"}");
     }
 
     private String getString(InputStream is) throws IOException {

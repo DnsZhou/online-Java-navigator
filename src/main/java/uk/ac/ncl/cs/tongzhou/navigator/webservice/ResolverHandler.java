@@ -30,7 +30,7 @@ public class ResolverHandler implements HttpHandler {
         String cu = params.get("cu").getFirst();
         String from = params.get("from").getFirst();
         String to = params.get("to").getFirst();
-        Cookie classpathCookie = httpServerExchange.getRequestCookies().get("classpathHash");
+        Cookie classpathCookie = httpServerExchange.getRequestCookies().get("classpath-hash");
         if (classpathCookie != null && !classpathCookie.getValue().isEmpty()) {
             classpathList = getClasspathDtoByHash(classpathCookie.getValue());
         }

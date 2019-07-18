@@ -12,7 +12,7 @@ public class GetClasspathHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
-        Cookie classpathCookie = httpServerExchange.getRequestCookies().get("classpathHash");
+        Cookie classpathCookie = httpServerExchange.getRequestCookies().get("classpath-hash");
         if (classpathCookie != null && !classpathCookie.getValue().isEmpty()) {
             String classpathHash = classpathCookie.getValue();
             File targetClasspathFile = new File(ClasspathSetterHandler.outputCustomizeClasspathRootDir, classpathHash + ".json");

@@ -12,7 +12,13 @@ new Vue({
         typeSearchQuery: '',
         typeSearchResults: [],
         currentSelectGavCu: null,
-        currentSelectId: null
+        currentSelectId: null,
+        currentClasspathList: [],
+        tempClasspathList: [],
+        showClasspathModal: false,
+    },
+    mounted() {
+        this.fetchClasspathList()
     },
     methods: {
         findGavCusByType() {
@@ -89,8 +95,65 @@ new Vue({
             if (this.currentSelectGavCu != null) {
                 this.clearSearch();
                 this.navigateByGavCu(this.currentSelectGavCu)
-                location.reload();z
+                location.reload();
             }
+        },
+        initializeClasspathModal() {
+            if (this.currentClasspathList == null || this.currentClasspathList.length == 0) {
+                this.fetchClasspathList();
+            }
+            this.tempClasspathList = this.currentClasspathList.slice(0);
+        },
+        classpathDel(index) {
+            this.tempClasspathList.splice(index, 1);
+        },
+        addClasspath() {
+            this.tempClasspathList.push("");
+        },
+        saveClasspath() {
+            this.currentClasspathList = this.tempClasspathList.slice(0);
+            this.updateClasspathHandler();
+            $("#classpathModal").modal('hide');
+        },
+        updateClasspathHandler() {
+            axios({
+                method: 'post',
+                url: 'http://' + host + ':' + port + '/setClasspath',
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                data: {
+                    classpathList: this.currentClasspathList
+                }
+            }).then((result) => {
+                var hash = result.data.classpathHash;
+                console.log('Update classpath successfully with classpath hash: ' + hash);
+                document.cookie = "classpath-hash=" + hash;
+            }).catch(function (error) {
+                console.log('Error while update classpath: ' + error);
+            })
+        },
+        fetchClasspathList() {
+            var hashCookie = this.getCookie("classpath-hash");
+            if (hashCookie != null && hashCookie.length != 0) {
+                axios({
+                    method: 'get',
+                    url: 'http://' + host + ':' + port + '/getClasspath',
+                }).then((result) => {
+                    this.currentClasspathList = result.data.classpathList;
+                    console.log('Fetch classpath List successfully -- ' + this.currentClasspathList.length + " records");
+                }).catch(function (error) {
+                    console.log('Error while fetch classpath List: ' + error);
+                })
+            }
+        },
+        getCookie(name) {
+            var arr = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)(;|$)"));
+            if (arr != null) {
+                console.log(arr);
+                return unescape(arr[2]);
+            }
+            return null;
         }
     }
 });
@@ -99,4 +162,6 @@ String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.replace(new RegExp(search, 'g'), replacement);
 };
-window.onload = function () { $("#content-wrapper").removeClass("hidden") }
+window.onload = function () {
+    $("#content-wrapper").removeClass("hidden")
+}
