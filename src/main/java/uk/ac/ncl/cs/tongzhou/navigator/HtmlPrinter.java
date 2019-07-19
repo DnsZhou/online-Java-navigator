@@ -27,9 +27,11 @@ public class HtmlPrinter extends Printer {
 
         if (node instanceof CompilationUnit) {
             stringBuilder.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n" +
-                    "<title>" + node.getClass().getName() + "</title>\n" +
+                    "<title>" + RepositoryWalker.currentScanningGavCu.cuName + "</title>\n" +
                     "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://dnszhou.github.io/assets/css/prettify.css\">\n" +
-                    "</head>\n<body>\n<pre class=\"prettyprint linenums\">");
+                    "</head>\n<body>\n<h3 style=\"display:inline\">" + RepositoryWalker.currentScanningGavCu.cuName + "</h3>" +
+                    "<span style=\"display:inline\">&nbsp;" + RepositoryWalker.currentScanningGavCu.artifact + ":" + RepositoryWalker.currentScanningGavCu.version + "</span>\n" +
+                    "<pre class=\"prettyprint linenums\">");
         }
 
         //TODO: print out the type of the node, add
@@ -39,19 +41,19 @@ public class HtmlPrinter extends Printer {
 
         if (node.containsData(LinkingVisitor.LINK_ID)) {
             stringBuilder.append("<span");
-            stringBuilder.append(" id='");
+            stringBuilder.append(" id=\"");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_ID));
-            stringBuilder.append("'");
-            stringBuilder.append(" class='");
+            stringBuilder.append("\"");
+            stringBuilder.append(" class=\"");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
-            stringBuilder.append("'>");
+            stringBuilder.append("\">");
         }
 
         if (node.containsData(LinkingVisitor.LINK_TO)) {
             stringBuilder.append("<a");
-            stringBuilder.append(" class='");
+            stringBuilder.append(" class=\"");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_STYLE));
-            stringBuilder.append("' href='http://" + WebServiceRouter.HOST_NAME + ":" + WebServiceRouter.PORT + "/resolver?");
+            stringBuilder.append("\" href=\"http://" + WebServiceRouter.HOST_NAME + ":" + WebServiceRouter.PORT + "/resolver?");
             stringBuilder.append("g=");
             stringBuilder.append(RepositoryWalker.currentScanningGavCu.group);
             stringBuilder.append("&a=");
@@ -64,7 +66,7 @@ public class HtmlPrinter extends Printer {
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navFrom);
             stringBuilder.append("&to=");
             stringBuilder.append(node.getData(LinkingVisitor.LINK_TO).navTo);
-            stringBuilder.append("'>");
+            stringBuilder.append("\">");
 
             RepositoryWalker.linkObjectListInCurrentCu.add(node.getData(LinkingVisitor.LINK_TO));
         }

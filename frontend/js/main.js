@@ -1,5 +1,5 @@
-var host = "localhost";
-// var host = "ec2-35-178-134-147.eu-west-2.compute.amazonaws.com"
+//var host = "localhost";
+var host = "ec2-35-178-134-147.eu-west-2.compute.amazonaws.com"
 var port = "8080";
 Vue.component('classpath-panel', {
     template: '<h5>Current Classpath:</h5>'
@@ -109,6 +109,9 @@ new Vue({
         },
         addClasspath() {
             this.tempClasspathList.push("");
+        },
+        clearClasspathDraft() {
+            this.tempClasspathList = [];
         },
         saveClasspath() {
             this.currentClasspathList = this.tempClasspathList.slice(0);

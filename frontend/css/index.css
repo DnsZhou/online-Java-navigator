@@ -28,6 +28,10 @@ iframe {
     width: inherit;
     line-height: 45px;
 }
+.tool-bar{
+   margin-top: 2px;
+   margin-bottom: 5px;
+}
 .search-dropdown a:hover{
     text-decoration: none;
 }
