@@ -14,12 +14,12 @@ import java.util.Date;
 public class Main<T> {
 
     public static void main(String[] args) throws Exception {
-        var startTime = new Date();
-        System.out.println("Process Started at " + startTime);
-        RepositoryWalker.processRepository();
-        var endTime = new Date();
-        System.out.println("Process Finished at " + endTime);
-        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
+//        var startTime = new Date();
+//        System.out.println("Process Started at " + startTime);
+//        RepositoryWalker.processRepository();
+//        var endTime = new Date();
+//        System.out.println("Process Finished at " + endTime);
+//        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
 
         WebServiceRouter.runServer();
     }

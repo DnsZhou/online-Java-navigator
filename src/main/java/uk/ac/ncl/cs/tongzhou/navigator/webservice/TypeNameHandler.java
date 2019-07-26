@@ -17,6 +17,8 @@ public class TypeNameHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
+        httpServerExchange.getResponseHeaders()
+                .put(new HttpString("Access-Control-Allow-Origin"), "*");
         Resolver resolver = new Resolver();
         Map<String, Deque<String>> params = httpServerExchange.getQueryParameters();
         String typeName = params.get("typeName").getFirst();

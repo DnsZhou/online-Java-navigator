@@ -1,6 +1,7 @@
 package uk.ac.ncl.cs.tongzhou.navigator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.ac.ncl.cs.tongzhou.navigator.awsservice.S3Handler;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.CompilationUnitDecl;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.GavCu;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ImportDecl;
@@ -19,6 +20,7 @@ public class Resolver {
 
     // TODO change me to dir where the customized classpath file is
     static File customizeClassFile = new File("tmp" + SLASH + "input" + SLASH + "classpath");
+    public static boolean RESOLVE_WITH_S3 = false;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,7 +41,6 @@ public class Resolver {
             return makePath(navigateFromGavCu, null);
         }
 
-        /*TODO: Solve @interface type not found in .json file/
         /*====Rule2: target type is an nested type of current type*/
         if (navFromTypeDecls != null && !navFromTypeDecls.isEmpty()) {
             for (TypeDecl typeDecl : navFromTypeDecls) {
@@ -87,10 +88,7 @@ public class Resolver {
                     GavCu candidate = new GavCu(gavCu);
                     return makePath(candidate, navigateTo);
                 }
-
-
             }
-
 
 
             /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
@@ -132,7 +130,6 @@ public class Resolver {
             }
         }
 
-        //Todo: return readable message showing that the Type is not found in the system
         return null;
     }
 
@@ -204,17 +201,32 @@ public class Resolver {
 
     //One single property file pre type name
     private List<String> findGAVsContaining(String typename) throws IOException {
+        List<String> gavs = null;
+        if (RESOLVE_WITH_S3) {
+            /*S3 is a case sensitive file system,but in order to make it compatible with the code in Windows
+             * environment, we just double check in the @ folder. */
+            String result = null;
+            result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir + SLASH + typename);
+            if (result == null || result.isEmpty()) {
+                result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename + SLASH + typename);
+                if (result == null || result.isEmpty()) {
+                    return null;
+                }
+            }
+            gavs = Arrays.asList(result.replace("\r", "").split("\n"));
 
-        File file = new File(RepositoryWalker.outputIndexRootDir, typename);
-        if (!file.exists()) {
-            return null;
-        } else if (!file.getCanonicalFile().getName().equals(file.getName())) {
-            file = new File(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename, typename);
+        } else {
+            File file = new File(RepositoryWalker.outputIndexRootDir + SLASH + typename);
             if (!file.exists()) {
                 return null;
+            } else if (!file.getCanonicalFile().getName().equals(file.getName())) {
+                file = new File(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename, typename);
+                if (!file.exists()) {
+                    return null;
+                }
             }
+            gavs = Files.readAllLines(file.toPath());
         }
-        List<String> gavs = Files.readAllLines(file.toPath());
         return gavs;
     }
 
@@ -223,8 +235,12 @@ public class Resolver {
         File file = new File(RepositoryWalker.outputJsonRootDir + SLASH + gavCu.group.replace(".", SLASH) + SLASH
                 + gavCu.artifact + SLASH + gavCu.version + SLASH + gavCu.artifact + "-" + gavCu.version + SLASH
                 + gavCu.cuName.replace(".", SLASH) + ".json");
-        return objectMapper.readValue(file, CompilationUnitDecl.class);
-
+        if (RESOLVE_WITH_S3) {
+            byte[] result = S3Handler.getBytefromS3ByPath(file.getPath());
+            return objectMapper.readValue(result, CompilationUnitDecl.class);
+        } else {
+            return objectMapper.readValue(file, CompilationUnitDecl.class);
+        }
     }
 
     private String getPackage(CompilationUnitDecl cuDecl) {

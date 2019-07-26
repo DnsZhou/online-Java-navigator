@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.ncl.cs.tongzhou</groupId>
     <artifactId>online-Java-navigator</artifactId>
-    <version>1.2.2</version>
+    <version>1.3.1</version>
     <name>Online Java Navigator</name>
     <description>An Online Navigator to browse Java code and provide dynamic link to all the symbol and provide
         navigation between files.
@@ -72,7 +72,29 @@
             <version>[2.0.21,)</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+        </dependency>
+
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.11.327</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

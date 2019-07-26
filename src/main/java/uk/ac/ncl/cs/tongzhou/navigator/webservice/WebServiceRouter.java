@@ -7,26 +7,36 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
+import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
 import java.io.File;
 
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
 public class WebServiceRouter {
-    //    public static String HOST_NAME = "ec2-35-178-134-147.eu-west-2.compute.amazonaws.com";
     public static String HOST_NAME = "localhost";
+    //    public static String HOST_NAME = "CHANGE_TO_YOUR_HOST";
+    public static String S3_URL = "CHANGE_TO_YOUR_S3_HOST";
     public static int PORT = 8080;
 
     public static void runServer() {
         File htmlDir = RepositoryWalker.outputHtmlRootDir;
         File frontendDir = new File("frontend" + SLASH);
 
+        /*For local storage use*/
         ResourceHandler resourceHandler = new ResourceHandler().setResourceManager(new FileResourceManager(htmlDir));
         ResourceHandler frontendHandler = new ResourceHandler().setResourceManager(new FileResourceManager(frontendDir));
 
-        PathHandler pathHandler = new PathHandler();
-        pathHandler.addPrefixPath("/repository", resourceHandler);
+        /*For S3 use*/
+        HttpHandler s3OutputResHandler = new S3OutputResHandler();
+        HttpHandler s3FrontendResHandler = new S3FrontendResHandler();
 
+        PathHandler pathHandler = new PathHandler();
+        if (Resolver.RESOLVE_WITH_S3) {
+            pathHandler.addPrefixPath("/repository", s3OutputResHandler);
+        } else {
+            pathHandler.addPrefixPath("/repository", resourceHandler);
+        }
         pathHandler.addPrefixPath("/", frontendHandler);
 
         HttpHandler resolver = new ResolverHandler();

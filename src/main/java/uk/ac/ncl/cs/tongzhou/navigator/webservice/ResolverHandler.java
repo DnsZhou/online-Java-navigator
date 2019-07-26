@@ -5,7 +5,9 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import io.undertow.util.StatusCodes;
+import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 import uk.ac.ncl.cs.tongzhou.navigator.jsonmodel.ClasspathDto;
 
@@ -16,11 +18,15 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
+import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
+
 public class ResolverHandler implements HttpHandler {
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
+        httpServerExchange.getResponseHeaders()
+                .put(new HttpString("Access-Control-Allow-Origin"), "*");
         List<String> classpathList = null;
         Resolver resolver = new Resolver();
         Map<String, Deque<String>> params = httpServerExchange.getQueryParameters();
@@ -37,8 +43,12 @@ public class ResolverHandler implements HttpHandler {
         String result = resolver.resolve(group, artifact, version, cu, from, to, classpathList);
         System.out.println(result);
         httpServerExchange.setStatusCode(StatusCodes.FOUND);
-        httpServerExchange.getResponseHeaders().put(Headers.LOCATION,
-                "/repository/" + result);
+        if (Resolver.RESOLVE_WITH_S3) {
+            httpServerExchange.getResponseHeaders().put(Headers.LOCATION, WebServiceRouter.S3_URL
+                    + RepositoryWalker.outputHtmlRootDir.getPath().replace(SLASH, "/") + "/" + result);
+        } else {
+            httpServerExchange.getResponseHeaders().put(Headers.LOCATION, "/repository/" + result);
+        }
         httpServerExchange.endExchange();
     }
 

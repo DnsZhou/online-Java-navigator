@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,8 @@ public class ClasspathSetterHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
+        httpServerExchange.getResponseHeaders()
+                .put(new HttpString("Access-Control-Allow-Origin"), "*");
         String jsonString = getString(httpServerExchange.getInputStream());
         byte[] jsonBytes = jsonString.getBytes("UTF-8");
         int jsonHash = Math.abs(jsonString.hashCode());

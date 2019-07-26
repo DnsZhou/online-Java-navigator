@@ -15,6 +15,9 @@ import java.util.Date;
 import java.util.List;
 
 public class AutoResolveTest {
+    Date startTime = new Date();
+    Date endTime;
+
     @Test
     public void testResolve() throws IOException {
         Files.walkFileTree(RepositoryWalker.outputTestCaseFileRootDir.toPath(), new SimpleFileVisitor<Path>() {
@@ -63,7 +66,9 @@ public class AutoResolveTest {
                 }
             }
         });
-        System.out.println(new Date());
+        endTime = new Date();
+        System.out.println("Automation Test Finished at " + endTime);
+        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
     }
 
 
