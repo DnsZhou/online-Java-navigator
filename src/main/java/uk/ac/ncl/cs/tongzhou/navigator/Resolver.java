@@ -151,28 +151,9 @@ public class Resolver {
         return resultCandidates;
     }
 
-    private boolean validateGavCuInClasspath(GavCu result) {
-        if (this.currentClasspathGavs == null || this.currentClasspathGavs.size() == 0) {
-            return true;
-        } else {
-            String candidate = result.group + ":" + result.artifact + ":" + result.version;
-            return this.currentClasspathGavs.contains(candidate);
-        }
-    }
-
     private boolean validateGavCuInSingleClasspath(GavCu candidate, String classpath) {
         return classpath.equals(candidate.group + ":" + candidate.artifact + ":" + candidate.version);
     }
-
-//    private boolean validateGavCuStringInClasspath(String result) {
-//        if (this.currentClasspathGavs == null || this.currentClasspathGavs.size() == 0) {
-//            return true;
-//        } else {
-//            String[] candidateSet = result.split(":");
-//            String candidate = candidateSet[0] + ":" + candidateSet[1] + ":" + candidateSet[2];
-//            return this.currentClasspathGavs.contains(candidate);
-//        }
-//    }
 
     private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<String> imports) {
         Set<String> resultCandidates = new HashSet<>(candidateSet);
@@ -218,7 +199,8 @@ public class Resolver {
     private String validateAndMakePath(Stream<GavCu> candidateStream, String navTo) {
         /*iterate the classpath in order, when find the candidate in any classpath, make the path with this candidate*/
         /*which means, if there is multiple candidate, the one who is listed upper in classpath will be used.*/
-        if (this.currentClasspathGavs != null && this.currentClasspathGavs.size() != 0) {
+        if (this.currentClasspathGavs != null && this.currentClasspathGavs.size() != 0
+                && !isEmptyStringList(this.currentClasspathGavs)) {
             List<GavCu> candidates = candidateStream.collect(Collectors.toList());
             for (String classpath : this.currentClasspathGavs) {
                 GavCu result = candidates.stream().filter(candidate -> validateGavCuInSingleClasspath(candidate, classpath)).findFirst().orElse(null);
@@ -299,5 +281,12 @@ public class Resolver {
             return typeDeclList;
         }
         return null;
+    }
+
+    private boolean isEmptyStringList(List<String> list) {
+        if (list != null && list.size() > 0) {
+            return !list.stream().anyMatch(item -> (item != null && !item.equals("")));
+        }
+        return true;
     }
 }
