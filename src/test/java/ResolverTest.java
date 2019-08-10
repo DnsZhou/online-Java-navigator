@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -227,15 +228,27 @@ public class ResolverTest {
         String version = "2.7.7.redhat-7";
         String compilationUnit = "antlr.ActionElement";
         String from = "ActionElement";
-        List<String> classpath = Collections.singletonList("antlr:antlr:2.7.7.redhat-7");
-
+        List<String> classpath = new ArrayList<String>();
+        classpath.add("antlr:antlr:2.7.7.redhat-7");
         String to = "String";
         String result1 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         System.out.println(result1);
+        assertEquals(Resolver.CLASSPATH_NOT_INCLUDED_RESULT, result1);
 
-        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java-base" + "/" + "11.0.1" + "/" + "java-base-11.0.1" + "/" + "java" + "/" + "lang" + "/" + "String.html#java.lang.String", result1);
+        classpath.add("net.java.openjdk:java8:8.1.0");
+        classpath.add("net.java.openjdk:java-base:11.0.1");
+        String result2 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        System.out.println(result2);
 
+        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java8" + "/" + "8.1.0" + "/" + "java8-8.1.0" + "/" + "java" + "/" + "lang" + "/" + "String.html#java.lang.String", result2);
 
+        classpath = new ArrayList<String>();
+        classpath.add("antlr:antlr:2.7.7.redhat-7");
+        classpath.add("net.java.openjdk:java-base:11.0.1");
+        classpath.add("net.java.openjdk:java8:8.1.0");
+        String result3 = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
+        System.out.println(result3);
+        assertEquals("net" + "/" + "java" + "/" + "openjdk" + "/" + "java-base" + "/" + "11.0.1" + "/" + "java-base-11.0.1" + "/" + "java" + "/" + "lang" + "/" + "String.html#java.lang.String", result3);
     }
 
     /*Rule 7:  Directly referred Type eg: com.google.testClass test = new com.google.testClass() */

@@ -107,6 +107,24 @@ new Vue({
         classpathDel(index) {
             this.tempClasspathList.splice(index, 1);
         },
+        upmoveClasspath(index) {
+            if (index > 0) {
+                var temp = this.tempClasspathList[index - 1];
+                // this.tempClasspathList[index - 1] = this.tempClasspathList[index];
+                // this.tempClasspathList[index] = temp;
+                Vue.set(this.tempClasspathList, index - 1, this.tempClasspathList[index])
+                Vue.set(this.tempClasspathList, index, temp)
+            }
+        },
+        downmoveClasspath(index) {
+            if (index < this.tempClasspathList.length - 1) {
+                var temp = this.tempClasspathList[index + 1];
+                Vue.set(this.tempClasspathList, index + 1, this.tempClasspathList[index])
+                // this.tempClasspathList[index + 1] = this.tempClasspathList[index];
+                Vue.set(this.tempClasspathList, index, temp)
+                // this.tempClasspathList[index] = temp;
+            }
+        },
         addClasspath() {
             this.tempClasspathList.push("");
         },

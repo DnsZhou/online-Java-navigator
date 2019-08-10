@@ -41,7 +41,6 @@ public class AutoResolveTest {
                         caseCount++;
                         try {
                             String resolveResult = resolveByString(testcase);
-//                            System.out.println(resolveResult);
                             if (resolveResult == null) {
                                 errorCount++;
                                 System.out.print("Error: Resolve(" + testcase + ") got null result, ");

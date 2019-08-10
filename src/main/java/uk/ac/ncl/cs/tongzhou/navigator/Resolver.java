@@ -12,22 +12,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 import static uk.ac.ncl.cs.tongzhou.navigator.Util.subStringLastDot;
 
 public class Resolver {
+    public static String CLASSPATH_NOT_INCLUDED_RESULT = "NOT_INCLUDED_IN_CLASSPATH";
 
     // TODO change me to dir where the customized classpath file is
     static File customizeClassFile = new File("tmp" + SLASH + "input" + SLASH + "classpath");
     public static boolean RESOLVE_WITH_S3 = false;
+    private List<String> currentClasspathGavs = null;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     public String resolve(String groupId, String artifactId, String version,
                           String compilationUnit, String navigateFrom, String navigateTo, List<String> classpathGAVs) throws IOException {
+        this.currentClasspathGavs = classpathGAVs;
         GavCu navigateFromGavCu = new GavCu(groupId, artifactId, version, compilationUnit);
-        GavCu resultGavCu = null;
 
         /*Get information of current Type from GavCu*/
         CompilationUnitDecl cuDecl = getCompilationUnitDecl(navigateFromGavCu);
@@ -38,7 +41,7 @@ public class Resolver {
 
         /*====Rule 1: Current Type itself*/
         if (navigateTo.equals(subStringLastDot(navigateFromGavCu.cuName.replace(navFromPkg + ".", "")))) {
-            return makePath(navigateFromGavCu, null);
+            return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), null);
         }
 
         /*====Rule2: target type is an nested type of current type*/
@@ -46,12 +49,12 @@ public class Resolver {
             for (TypeDecl typeDecl : navFromTypeDecls) {
                 /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
                 if (typeDecl.name.replace(fullNavFromString + ".", "").equals(navigateTo)) {
-                    return makePath(navigateFromGavCu, null);
+                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), null);
                 }
 
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
                 if (typeDecl.name.equals(fullNavFromString.substring(0, fullNavFromString.lastIndexOf(".")) + "." + navigateTo)) {
-                    return makePath(navigateFromGavCu, navigateTo);
+                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), navigateTo);
                 }
             }
         }
@@ -62,15 +65,13 @@ public class Resolver {
         List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateToTypeName);
 
         if (gavsContainingMatchingCUs != null && !gavsContainingMatchingCUs.isEmpty()) {
-            /*Todo: ask what if current package is not defined in classPath?*/
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
             Set<String> candidateSetWithClassPath = new HashSet<>(candidateSet);
-            if (classpathGAVs != null && !classpathGAVs.isEmpty()) {
-                Set<String> classpathSet = new HashSet<>(classpathGAVs);
+            if (this.currentClasspathGavs != null && !this.currentClasspathGavs.isEmpty()) {
+                Set<String> classpathSet = new HashSet<>(this.currentClasspathGavs);
                 candidateSetWithClassPath = filterCandidatesByClasspath(candidateSetWithClassPath, classpathSet);
             }
 
-            /*Todo: fix X.X type for specific single type import*/
             /*====Rule 3: The specific single type imported Type*/
             if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
@@ -79,14 +80,17 @@ public class Resolver {
                     /*====Rule 3.1 nested type for specific imported case*/
                     if (navigateTo.contains(".")) {
                         String parentTypeString = navigateTo.substring(0, navigateTo.indexOf("."));
-                        List<String> filteredImportForCandidate = importStringList.stream().filter(imp -> imp.substring(imp.lastIndexOf(".") + 1, imp.length()).equals(parentTypeString)).collect(Collectors.toList());
-                        List<String> candidateImportStrings = filteredImportForCandidate.stream().map(str -> str.substring(0, str.lastIndexOf(".")) + "." + navigateTo).collect(Collectors.toList());
+                        List<String> filteredImportForCandidate = importStringList.stream()
+                                .filter(imp -> imp.substring(imp.lastIndexOf(".") + 1, imp.length()).equals(parentTypeString))
+                                .collect(Collectors.toList());
+                        List<String> candidateImportStrings = filteredImportForCandidate.stream()
+                                .map(str -> str.substring(0, str.lastIndexOf(".")) + "." + navigateTo)
+                                .collect(Collectors.toList());
                         importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, candidateImportStrings);
                     }
                 }
-                for (String gavCu : importFilteredCandidates) {
-                    GavCu candidate = new GavCu(gavCu);
-                    return makePath(candidate, navigateTo);
+                if (importFilteredCandidates != null && importFilteredCandidates.size() != 0) {
+                    return validateAndMakePath(importFilteredCandidates.stream().map(candidate -> new GavCu(candidate)), navigateTo);
                 }
             }
 
@@ -94,9 +98,10 @@ public class Resolver {
             /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
             Set<String> result = new HashSet<>(candidateSetWithClassPath);
 //            navigateTo
-            result.removeIf(candidate -> substringPkgName(candidate, navigateTo) == null || !substringPkgName(candidate, navigateTo).equals(navFromPkg));
+            result.removeIf(candidate -> substringPkgName(candidate, navigateTo) == null
+                    || !substringPkgName(candidate, navigateTo).equals(navFromPkg));
             if (!result.isEmpty()) {
-                return makePath(result.iterator().next(), navigateTo);
+                return validateAndMakePath(result.stream().map(candidate -> new GavCu(candidate)), navigateTo);
             }
 
             /*Todo: fix X.X type for specific single type import*/
@@ -105,17 +110,16 @@ public class Resolver {
                 List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
                         -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
                 Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, tryImportDecls);
-                for (String gavCu : ondemandImportFilteredCandidates) {
-                    GavCu candidate = new GavCu(gavCu);
-                    return makePath(candidate, null);
+                if (ondemandImportFilteredCandidates != null && ondemandImportFilteredCandidates.size() > 0) {
+                    return validateAndMakePath(ondemandImportFilteredCandidates.stream().map(candidate -> new GavCu(candidate)), null);
                 }
             }
 
-            /*Todo: fix X.X type for specific single type import*/
             /*====Rule 6: Default imported Type: java.lang*/
-            String langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate, navigateTo) != null && substringPkgName(candidate, navigateTo).equals("java.lang")).findAny().orElse(null);
-            if (langResult != null) {
-                return makePath(langResult, null);
+            List<String> langResult = candidateSet.stream().filter(candidate -> substringPkgName(candidate, navigateTo) != null
+                    && substringPkgName(candidate, navigateTo).equals("java.lang")).collect(Collectors.toList());
+            if (langResult != null && langResult.size() > 0) {
+                return validateAndMakePath(langResult.stream().map(candidate -> new GavCu(candidate)), null);
             }
         }
         /*Todo: fix X.X type for specific single type import*/
@@ -126,7 +130,7 @@ public class Resolver {
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUsForDR);
             candidateSet.removeIf(candidate -> !substringTypeName(candidate).equals(navigateTo));
             if (candidateSet.size() > 0) {
-                return makePath(candidateSet.iterator().next(), null);
+                return validateAndMakePath(candidateSet.stream().map(candidate -> new GavCu(candidate)), null);
             }
         }
 
@@ -152,6 +156,29 @@ public class Resolver {
         return resultCandidates;
     }
 
+    private boolean validateGavCuInClasspath(GavCu result) {
+        if (this.currentClasspathGavs == null || this.currentClasspathGavs.size() == 0) {
+            return true;
+        } else {
+            String candidate = result.group + ":" + result.artifact + ":" + result.version;
+            return this.currentClasspathGavs.contains(candidate);
+        }
+    }
+
+    private boolean validateGavCuInSingleClasspath(GavCu candidate, String classpath) {
+        return classpath.equals(candidate.group + ":" + candidate.artifact + ":" + candidate.version);
+    }
+
+//    private boolean validateGavCuStringInClasspath(String result) {
+//        if (this.currentClasspathGavs == null || this.currentClasspathGavs.size() == 0) {
+//            return true;
+//        } else {
+//            String[] candidateSet = result.split(":");
+//            String candidate = candidateSet[0] + ":" + candidateSet[1] + ":" + candidateSet[2];
+//            return this.currentClasspathGavs.contains(candidate);
+//        }
+//    }
+
     private Set<String> filterCandidatesByImports(final Set<String> candidateSet, final List<String> imports) {
         Set<String> resultCandidates = new HashSet<>(candidateSet);
         resultCandidates.removeIf(candidate -> !imports.stream().anyMatch(value -> value.equals(candidate.substring(candidate.lastIndexOf(':') + 1, candidate.length()))));
@@ -159,10 +186,6 @@ public class Resolver {
     }
 
     public String resolve(String groupId, String artifactId, String version, String compilationUnit, String navFrom, String navTo) throws IOException {
-        if (customizeClassFile.exists()) {
-            List<String> classpathGavs = Files.readAllLines(customizeClassFile.toPath());
-            return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, classpathGavs);
-        }
         return resolve(groupId, artifactId, version, compilationUnit, navFrom, navTo, null);
     }
 
@@ -171,33 +194,47 @@ public class Resolver {
     }
 
     private String makePath(GavCu gavCu, String navTo) {
-        String groupId = gavCu.group;
-        String artifactId = gavCu.artifact;
-        String version = gavCu.version;
-        String[] cuInfo = gavCu.cuName.split("[.]");
-        String toId = gavCu.cuName;
-        if (navTo != null && navTo.contains(".")) {
-            String actualCu = gavCu.cuName.replace(navTo.substring(navTo.indexOf("."), navTo.length()), "");
-            cuInfo = actualCu.split("[.]");
-            toId = actualCu + "." + navTo.substring(navTo.indexOf(".") + 1, navTo.length());
-        }
-        String pathResult = "";
+        if (gavCu != null) {
+            String groupId = gavCu.group;
+            String artifactId = gavCu.artifact;
+            String version = gavCu.version;
+            String[] cuInfo = gavCu.cuName.split("[.]");
+            String toId = gavCu.cuName;
+            if (navTo != null && navTo.contains(".")) {
+                String actualCu = gavCu.cuName.replace(navTo.substring(navTo.indexOf("."), navTo.length()), "");
+                cuInfo = actualCu.split("[.]");
+                toId = actualCu + "." + navTo.substring(navTo.indexOf(".") + 1, navTo.length());
+            }
+            String pathResult = "";
 
-        pathResult = pathResult.concat(groupId.replace(".", "/") + "/" + artifactId + "/"
-                + version + "/" + artifactId + "-" + version);
-        for (String info : cuInfo) {
-            pathResult = pathResult.concat("/").concat(info);
-        }
-        pathResult = pathResult.concat(".html#");
-        pathResult = pathResult.concat(toId);
+            pathResult = pathResult.concat(groupId.replace(".", "/") + "/" + artifactId + "/"
+                    + version + "/" + artifactId + "-" + version);
+            for (String info : cuInfo) {
+                pathResult = pathResult.concat("/").concat(info);
+            }
+            pathResult = pathResult.concat(".html#");
+            pathResult = pathResult.concat(toId);
 
-        return pathResult;
+            return pathResult;
+        }
+        return null;
     }
 
-    private String makePath(String gavCu, String navTo) {
-        return makePath(new GavCu(gavCu), navTo);
+    private String validateAndMakePath(Stream<GavCu> candidateStream, String navTo) {
+        /*iterate the classpath in order, when find the candidate in any classpath, make the path with this candidate*/
+        /*which means, if there is multiple candidate, the one who is listed upper in classpath will be used.*/
+        if (this.currentClasspathGavs != null && this.currentClasspathGavs.size() != 0) {
+            List<GavCu> candidates = candidateStream.collect(Collectors.toList());
+            for (String classpath : this.currentClasspathGavs) {
+                GavCu result = candidates.stream().filter(candidate -> validateGavCuInSingleClasspath(candidate, classpath)).findFirst().orElse(null);
+                if (result != null) {
+                    return makePath(result, navTo);
+                }
+            }
+            return CLASSPATH_NOT_INCLUDED_RESULT;
+        }
+        return makePath(candidateStream.findAny().orElse(null), navTo);
     }
-
 
     //One single property file pre type name
     private List<String> findGAVsContaining(String typename) throws IOException {

@@ -111,6 +111,10 @@
                                 aria-label="Input new classpath item" aria-describedby="basic-addon2"
                                 v-model="tempClasspathList[index]" tabindex="-1">
                             <div class="input-group-append">
+                                <button class="btn btn-light btn-sm" type="button"
+                                    @click="upmoveClasspath(index)">&uarr;</button>
+                                <button class="btn btn-light btn-sm" type="button"
+                                    @click="downmoveClasspath(index)">&darr;</button>
                                 <button class="btn btn-danger btn-sm" type="button" @click="classpathDel(index)"><i
                                         class="fas fa-minus-square"></i></button>
                             </div>
