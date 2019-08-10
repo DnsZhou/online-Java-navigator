@@ -66,16 +66,11 @@ public class Resolver {
 
         if (gavsContainingMatchingCUs != null && !gavsContainingMatchingCUs.isEmpty()) {
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
-            Set<String> candidateSetWithClassPath = new HashSet<>(candidateSet);
-            if (this.currentClasspathGavs != null && !this.currentClasspathGavs.isEmpty()) {
-                Set<String> classpathSet = new HashSet<>(this.currentClasspathGavs);
-                candidateSetWithClassPath = filterCandidatesByClasspath(candidateSetWithClassPath, classpathSet);
-            }
 
             /*====Rule 3: The specific single type imported Type*/
             if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> importStringList = navFromImports.stream().map(importDecl -> importDecl.name).collect(Collectors.toList());
-                Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, importStringList);
+                Set<String> importFilteredCandidates = filterCandidatesByImports(candidateSet, importStringList);
                 if (importFilteredCandidates.isEmpty()) {
                     /*====Rule 3.1 nested type for specific imported case*/
                     if (navigateTo.contains(".")) {
@@ -86,7 +81,7 @@ public class Resolver {
                         List<String> candidateImportStrings = filteredImportForCandidate.stream()
                                 .map(str -> str.substring(0, str.lastIndexOf(".")) + "." + navigateTo)
                                 .collect(Collectors.toList());
-                        importFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, candidateImportStrings);
+                        importFilteredCandidates = filterCandidatesByImports(candidateSet, candidateImportStrings);
                     }
                 }
                 if (importFilteredCandidates != null && importFilteredCandidates.size() != 0) {
@@ -96,7 +91,7 @@ public class Resolver {
 
 
             /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
-            Set<String> result = new HashSet<>(candidateSetWithClassPath);
+            Set<String> result = new HashSet<>(candidateSet);
 //            navigateTo
             result.removeIf(candidate -> substringPkgName(candidate, navigateTo) == null
                     || !substringPkgName(candidate, navigateTo).equals(navFromPkg));
@@ -109,7 +104,7 @@ public class Resolver {
             if (navFromImports != null && !navFromImports.isEmpty()) {
                 List<String> tryImportDecls = navFromImports.stream().filter(importDecl -> importDecl.name.contains("*")).map(importDecl
                         -> importDecl.name.replace("*", navigateTo)).collect(Collectors.toList());
-                Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSetWithClassPath, tryImportDecls);
+                Set<String> ondemandImportFilteredCandidates = filterCandidatesByImports(candidateSet, tryImportDecls);
                 if (ondemandImportFilteredCandidates != null && ondemandImportFilteredCandidates.size() > 0) {
                     return validateAndMakePath(ondemandImportFilteredCandidates.stream().map(candidate -> new GavCu(candidate)), null);
                 }

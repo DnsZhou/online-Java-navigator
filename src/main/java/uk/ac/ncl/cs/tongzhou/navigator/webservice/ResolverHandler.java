@@ -41,12 +41,14 @@ public class ResolverHandler implements HttpHandler {
             classpathList = getClasspathDtoByHash(classpathCookie.getValue());
         }
         String result = resolver.resolve(group, artifact, version, cu, from, to, classpathList);
-        if (result.equals(Resolver.CLASSPATH_NOT_INCLUDED_RESULT)) {
-            httpServerExchange.setStatusCode(StatusCodes.CONFLICT);
-        } else if (result == null) {
-            httpServerExchange.setStatusCode(StatusCodes.NOT_FOUND);
+        httpServerExchange.setStatusCode(StatusCodes.FOUND);
+        if (result == null) {
+//            httpServerExchange.setStatusCode(StatusCodes.NOT_FOUND);
+            httpServerExchange.getResponseHeaders().put(Headers.LOCATION, "/404.html");
+        } else if (result.equals(Resolver.CLASSPATH_NOT_INCLUDED_RESULT)) {
+//            httpServerExchange.setStatusCode(StatusCodes.CONFLICT);
+            httpServerExchange.getResponseHeaders().put(Headers.LOCATION, "/notInClasspath.html");
         } else {
-            httpServerExchange.setStatusCode(StatusCodes.FOUND);
             if (Resolver.RESOLVE_WITH_S3) {
                 httpServerExchange.getResponseHeaders().put(Headers.LOCATION, WebServiceRouter.S3_URL
                         + RepositoryWalker.outputHtmlRootDir.getPath().replace(SLASH, "/") + "/" + result);

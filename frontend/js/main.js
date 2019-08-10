@@ -110,8 +110,6 @@ new Vue({
         upmoveClasspath(index) {
             if (index > 0) {
                 var temp = this.tempClasspathList[index - 1];
-                // this.tempClasspathList[index - 1] = this.tempClasspathList[index];
-                // this.tempClasspathList[index] = temp;
                 Vue.set(this.tempClasspathList, index - 1, this.tempClasspathList[index])
                 Vue.set(this.tempClasspathList, index, temp)
             }
@@ -120,9 +118,7 @@ new Vue({
             if (index < this.tempClasspathList.length - 1) {
                 var temp = this.tempClasspathList[index + 1];
                 Vue.set(this.tempClasspathList, index + 1, this.tempClasspathList[index])
-                // this.tempClasspathList[index + 1] = this.tempClasspathList[index];
                 Vue.set(this.tempClasspathList, index, temp)
-                // this.tempClasspathList[index] = temp;
             }
         },
         addClasspath() {
