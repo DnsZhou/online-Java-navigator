@@ -58,18 +58,18 @@
         </nav>
 
         <div class="container hidden" id="content-wrapper">
-            <div v-if="this.currentUrl" class="tool-bar">
-                <div class="btn-group " role="group" aria-label="Basic example">
-                    <button type="button" class="btn btn-secondary"
-                        @click="frameBack">&nbsp;&lt;&nbsp;Back&nbsp;&nbsp;&nbsp;&nbsp;</button>&nbsp;
-                    <button type="button" class="btn btn-secondary" @click="frameForward">Forward&nbsp;&gt;</button>
-                </div>
-                <div style="float:right">
-                    <button type="button" class="btn btn-secondary" @click="clearSession">
-                        <i class="fas fa-home"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- <div v-if="this.currentUrl" class="tool-bar">
+                            <div class="btn-group " role="group" aria-label="Basic example">
+                                <button type="button" class="btn btn-secondary"
+                                    @click="frameBack">&nbsp;&lt;&nbsp;Back&nbsp;&nbsp;&nbsp;&nbsp;</button>&nbsp;
+                                <button type="button" class="btn btn-secondary" @click="frameForward">Forward&nbsp;&gt;</button>
+                            </div>
+                            <div style="float:right">
+                                <button type="button" class="btn btn-secondary" @click="clearSession">
+                                    <i class="fas fa-home"></i>
+                                </button>
+                            </div>
+                        </div> -->
             <iframe v-if="this.currentUrl" id="codeFrame" v-bind:src="currentUrl"></iframe>
             <div v-if="!this.currentUrl" id="search-bar">
                 <div class="form-group">
