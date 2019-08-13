@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -17,6 +18,7 @@ import java.util.List;
 public class AutoResolveTest {
     Date startTime = new Date();
     Date endTime;
+    long allFilesCount = getFileSize(RepositoryWalker.outputTestCaseFileRootDir);
 
     @Test
     public void testResolve() throws IOException {
@@ -67,7 +69,7 @@ public class AutoResolveTest {
         });
         endTime = new Date();
         System.out.println("Automation Test Finished at " + endTime);
-        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds.");
+        System.out.println("Took " + ((double) (endTime.getTime() - startTime.getTime()) / 1000) + " seconds to resolve " + allFilesCount + " links.");
     }
 
 

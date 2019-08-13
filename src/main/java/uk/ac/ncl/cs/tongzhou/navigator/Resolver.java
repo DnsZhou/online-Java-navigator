@@ -21,7 +21,6 @@ public class Resolver {
     public static String CLASSPATH_NOT_INCLUDED_RESULT = "NOT_INCLUDED_IN_CLASSPATH";
 
     // TODO change me to dir where the customized classpath file is
-    static File customizeClassFile = new File("tmp" + SLASH + "input" + SLASH + "classpath");
     public static boolean RESOLVE_WITH_S3 = false;
     private List<String> currentClasspathGavs = null;
 
@@ -49,7 +48,7 @@ public class Resolver {
             for (TypeDecl typeDecl : navFromTypeDecls) {
                 /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
                 if (typeDecl.name.replace(fullNavFromString + ".", "").equals(navigateTo)) {
-                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), null);
+                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), navigateTo);
                 }
 
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */

@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,18 +14,37 @@ public class SampleResolveTest {
     public void resolveAny() throws IOException {
         Resolver resolver = new Resolver();
 
-        String groupId = "antlr";
-        String artifactId = "antlr";
-        String version = "2.7.7.redhat-7";
-        String compilationUnit = "antlr.ActionTransInfo";
-        String from = "ActionTransInfo";
-        String to = "ActionElement.TestInternalClass";
-//        List<String> classpath = Collections.singletonList("net.java.openjdk:java-base:11.0.1");
+        String groupId = "xerces";
+        String artifactId = "xercesImpl";
+        String version = "2.12.0.SP02-redhat-00001";
+        String compilationUnit = "org.apache.xerces.util.SymbolHash";
+        String from = "SymbolHash";
+        List<String> classpath = new ArrayList<String>();
+        classpath.add("xerces:xercesImpl:2.12.0.SP02-redhat-00001");
+        String to = "Entry";
 
-//        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, classpath);
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, null);
         System.out.println(result);
-        assertEquals("antlr/antlr/2.7.7.redhat-7/antlr-2.7.7.redhat-7/antlr/ActionElement.html#antlr.ActionElement.TestInternalClass", result);
+        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.apache.xerces.util.SymbolHash.Entry", result);
+
+    }
+
+    @Test
+    public void resolveAny2() throws IOException {
+        Resolver resolver = new Resolver();
+
+        String groupId = "xerces";
+        String artifactId = "xercesImpl";
+        String version = "2.12.0.SP02-redhat-00001";
+        String compilationUnit = "org.apache.xerces.util.SymbolHash";
+        String from = "SymbolHash";
+        List<String> classpath = new ArrayList<String>();
+        classpath.add("xerces:xercesImpl:2.12.0.SP02-redhat-00001");
+        String to = "SymbolHash.Entry";
+
+        String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, null);
+        System.out.println(result);
+        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.apache.xerces.util.SymbolHash.Entry", result);
 
     }
 }
