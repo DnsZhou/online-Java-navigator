@@ -48,7 +48,8 @@ public class Resolver {
             for (TypeDecl typeDecl : navFromTypeDecls) {
                 /*case 1: quote internal class without the name of its father class, eg: InternalClass class; */
                 if (typeDecl.name.replace(fullNavFromString + ".", "").equals(navigateTo)) {
-                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), navigateTo);
+                    String targetId = fullNavFromString.substring(fullNavFromString.lastIndexOf(".") + 1, fullNavFromString.length());
+                    return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), targetId + "." + navigateTo);
                 }
 
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */

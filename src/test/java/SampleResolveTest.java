@@ -25,7 +25,7 @@ public class SampleResolveTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, null);
         System.out.println(result);
-        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.apache.xerces.util.SymbolHash.Entry", result);
+        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.Entry", result);
 
     }
 
@@ -44,7 +44,7 @@ public class SampleResolveTest {
 
         String result = resolver.resolve(groupId, artifactId, version, compilationUnit, from, to, null);
         System.out.println(result);
-        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.apache.xerces.util.SymbolHash.Entry", result);
+        assertEquals("xerces/xercesImpl/2.12.0.SP02-redhat-00001/xercesImpl-2.12.0.SP02-redhat-00001/org/apache/xerces/util/SymbolHash.html#org.apache.xerces.util.SymbolHash.Entry", result);
 
     }
 }
