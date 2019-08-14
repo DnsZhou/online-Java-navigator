@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.ncl.cs.tongzhou</groupId>
     <artifactId>online-Java-navigator</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <name>Online Java Navigator</name>
     <description>An Online Navigator to browse Java code and provide dynamic link to all the symbol and provide
         navigation between files.
