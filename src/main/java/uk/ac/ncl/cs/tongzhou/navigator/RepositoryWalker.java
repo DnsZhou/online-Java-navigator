@@ -249,8 +249,11 @@ public class RepositoryWalker {
             }
 
             if (GENERATE_TEST_CASES && linkObjectListInCurrentCu != null && !linkObjectListInCurrentCu.isEmpty()) {
-                List<String> gavCuToList = linkObjectListInCurrentCu.stream().map(linkObject -> gavCuString.replace(":", ",") + "," + linkObject.navFrom + "," + linkObject.navTo).distinct().collect(Collectors.toList());
-                File testCaseFile = new File(outputTestCaseFileRootDir, gavCuString.replace(":", "_") + ".csv");
+                List<String> gavCuToList = linkObjectListInCurrentCu.stream().map(linkObject -> gavCuString.replace(
+                        ":", ",") + "," + linkObject.navFrom + "," + linkObject.navTo)
+                        .distinct().collect(Collectors.toList());
+                File testCaseFile = new File(outputTestCaseFileRootDir, gavCuString
+                        .replace(":", "_") + ".csv");
                 testCaseFile.getParentFile().mkdirs();
                 Files.write(testCaseFile.toPath(), gavCuToList, StandardCharsets.UTF_8);
             }
@@ -321,7 +324,7 @@ public class RepositoryWalker {
     }
 
     private void indexRepository() throws IOException {
-        //Todo: scan all the index file in the output/JsonDocs folder and generate index into index/ folder
+        //scan all the package.json file in the output/JsonDocs folder and generate index into index/ folder
         /*
         Index format:
         <group>:<artifact>:<version>:<declaration name>
@@ -344,7 +347,8 @@ public class RepositoryWalker {
 
                     String artifact = pathTokens[pathTokens.length - 3];
                     String version = pathTokens[pathTokens.length - 2];
-                    String group = relativePath.substring(1).replace(SLASH + artifact + SLASH + version + SLASH + artifact + "-" + version, "");
+                    String group = relativePath.substring(1)
+                            .replace(SLASH + artifact + SLASH + version + SLASH + artifact + "-" + version, "");
                     group = group.replace(SLASH, ".");
                     PackageInfo currentPackageInfo = objectMapper.readValue(file.toFile(), PackageInfo.class);
                     for (CompilationUnitDecl cuItem : currentPackageInfo.compilationUnitDecls) {

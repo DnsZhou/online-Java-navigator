@@ -49,7 +49,7 @@ public class ResolverHandler implements HttpHandler {
 //            httpServerExchange.setStatusCode(StatusCodes.CONFLICT);
             httpServerExchange.getResponseHeaders().put(Headers.LOCATION, "/notInClasspath.html");
         } else {
-            if (Resolver.RESOLVE_WITH_S3) {
+            if (Resolver.RESOLVE_SOLUTION.equals("S3") || Resolver.RESOLVE_SOLUTION.equals("HYBRID")) {
                 httpServerExchange.getResponseHeaders().put(Headers.LOCATION, WebServiceRouter.S3_URL
                         + RepositoryWalker.outputHtmlRootDir.getPath().replace(SLASH, "/") + "/" + result);
             } else {

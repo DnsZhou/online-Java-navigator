@@ -15,8 +15,8 @@ import static uk.ac.ncl.cs.tongzhou.navigator.Util.SLASH;
 
 public class WebServiceRouter {
     public static String HOST_NAME = "localhost";
-    //    public static String HOST_NAME = "CHANGE_TO_YOUR_HOST";
-    public static String S3_URL = "CHANGE_TO_YOUR_S3_HOST";
+    //    public static String HOST_NAME = "ec2-35-178-134-147.eu-west-2.compute.amazonaws.com";
+    public static String S3_URL = "http://online-java-navigator.s3.eu-west-2.amazonaws.com/";
     public static int PORT = 8080;
 
     public static void runServer() {
@@ -32,7 +32,7 @@ public class WebServiceRouter {
         HttpHandler s3FrontendResHandler = new S3FrontendResHandler();
 
         PathHandler pathHandler = new PathHandler();
-        if (Resolver.RESOLVE_WITH_S3) {
+        if (Resolver.RESOLVE_SOLUTION.equals("S3") || Resolver.RESOLVE_SOLUTION.equals("HYBRID")) {
             pathHandler.addPrefixPath("/repository", s3OutputResHandler);
         } else {
             pathHandler.addPrefixPath("/repository", resourceHandler);

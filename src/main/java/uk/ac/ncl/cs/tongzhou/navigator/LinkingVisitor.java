@@ -34,20 +34,11 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
     private final List<String> declaredTypes = new ArrayList<>();
     private final List<String> declaredImports = new ArrayList<>();
 
-    public List<TypeDeclaration> getTypeDeclarations() {
-        return typeDeclarations;
-    }
-
     public List<ImportDeclaration> getImportDeclarations() {
         return importDeclarations;
     }
-
     public List<String> getDeclaredTypes() {
         return declaredTypes;
-    }
-
-    public List<String> getDeclaredImports() {
-        return declaredImports;
     }
 
 
@@ -56,7 +47,8 @@ public class LinkingVisitor extends VoidVisitorAdapter<JavaSymbolSolver> {
 
         typeDeclarations.add(node);
 
-        ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver.resolveDeclaration(node, ResolvedReferenceTypeDeclaration.class);
+        ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver
+                .resolveDeclaration(node, ResolvedReferenceTypeDeclaration.class);
         String name = resolvedReferenceTypeDeclaration.getQualifiedName();
 
         node.setData(LINK_ID, name);

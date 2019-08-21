@@ -21,7 +21,9 @@ public class Resolver {
     public static String CLASSPATH_NOT_INCLUDED_RESULT = "NOT_INCLUDED_IN_CLASSPATH";
 
     // TODO change me to dir where the customized classpath file is
-    public static boolean RESOLVE_WITH_S3 = false;
+//    public static String RESOLVE_SOLUTION = "LOCAL";
+    //    public static String RESOLVE_SOLUTION = "S3";
+    public static String RESOLVE_SOLUTION = "HYBRID";
     private List<String> currentClasspathGavs = null;
 
     static final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,7 +53,6 @@ public class Resolver {
                     String targetId = fullNavFromString.substring(fullNavFromString.lastIndexOf(".") + 1, fullNavFromString.length());
                     return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), targetId + "." + navigateTo);
                 }
-
                 /*case 2: quote internal class with the name of its father class, eg: ThisClass.InternalClass class; */
                 if (typeDecl.name.equals(fullNavFromString.substring(0, fullNavFromString.lastIndexOf(".")) + "." + navigateTo)) {
                     return validateAndMakePath(Arrays.asList(navigateFromGavCu).stream(), navigateTo);
@@ -59,11 +60,9 @@ public class Resolver {
             }
         }
 
-
         /* Find the index file with the type name;*/
         String navigateToTypeName = navigateTo.substring(navigateTo.lastIndexOf(".") + 1, navigateTo.length());
         List<String> gavsContainingMatchingCUs = findGAVsContaining(navigateToTypeName);
-
         if (gavsContainingMatchingCUs != null && !gavsContainingMatchingCUs.isEmpty()) {
             Set<String> candidateSet = new HashSet<>(gavsContainingMatchingCUs);
 
@@ -88,7 +87,6 @@ public class Resolver {
                     return validateAndMakePath(importFilteredCandidates.stream().map(candidate -> new GavCu(candidate)), navigateTo);
                 }
             }
-
 
             /*====Rule 4: same package Types, get current package and use it to filter the index candidates*/
             Set<String> result = new HashSet<>(candidateSet);
@@ -216,30 +214,36 @@ public class Resolver {
     //One single property file pre type name
     private List<String> findGAVsContaining(String typename) throws IOException {
         List<String> gavs = null;
-        if (RESOLVE_WITH_S3) {
-            /*S3 is a case sensitive file system,but in order to make it compatible with the code in Windows
-             * environment, we just double check in the @ folder. */
-            String result = null;
-            result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir + SLASH + typename);
-            if (result == null || result.isEmpty()) {
-                result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename + SLASH + typename);
+        switch (this.RESOLVE_SOLUTION) {
+            case "S3": {
+                /*S3 is a case sensitive file system,but in order to make it compatible with the code in Windows
+                 * environment, we just double check in the @ folder. */
+                String result = null;
+                result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir + SLASH + typename);
                 if (result == null || result.isEmpty()) {
-                    return null;
+                    result = S3Handler.getStringfromS3ByPath(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename + SLASH + typename);
+                    if (result == null || result.isEmpty()) {
+                        return null;
+                    }
                 }
+                gavs = Arrays.asList(result.replace("\r", "").split("\n"));
             }
-            gavs = Arrays.asList(result.replace("\r", "").split("\n"));
+            break;
 
-        } else {
-            File file = new File(RepositoryWalker.outputIndexRootDir + SLASH + typename);
-            if (!file.exists()) {
-                return null;
-            } else if (!file.getCanonicalFile().getName().equals(file.getName())) {
-                file = new File(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename, typename);
+            case "HYBRID":
+            case "LOCAL": {
+                File file = new File(RepositoryWalker.outputIndexRootDir + SLASH + typename);
                 if (!file.exists()) {
                     return null;
+                } else if (!file.getCanonicalFile().getName().equals(file.getName())) {
+                    file = new File(RepositoryWalker.outputIndexRootDir.getPath() + SLASH + "@" + typename, typename);
+                    if (!file.exists()) {
+                        return null;
+                    }
                 }
+                gavs = Files.readAllLines(file.toPath());
             }
-            gavs = Files.readAllLines(file.toPath());
+            break;
         }
         return gavs;
     }
@@ -249,7 +253,7 @@ public class Resolver {
         File file = new File(RepositoryWalker.outputJsonRootDir + SLASH + gavCu.group.replace(".", SLASH) + SLASH
                 + gavCu.artifact + SLASH + gavCu.version + SLASH + gavCu.artifact + "-" + gavCu.version + SLASH
                 + gavCu.cuName.replace(".", SLASH) + ".json");
-        if (RESOLVE_WITH_S3) {
+        if (this.RESOLVE_SOLUTION.equals("S3")) {
             byte[] result = S3Handler.getBytefromS3ByPath(file.getPath());
             return objectMapper.readValue(result, CompilationUnitDecl.class);
         } else {

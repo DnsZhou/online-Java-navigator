@@ -2,7 +2,6 @@ import org.junit.jupiter.api.Test;
 import uk.ac.ncl.cs.tongzhou.navigator.RepositoryWalker;
 import uk.ac.ncl.cs.tongzhou.navigator.Resolver;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
