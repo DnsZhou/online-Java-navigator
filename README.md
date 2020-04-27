@@ -3,7 +3,6 @@
 
 An Online Navigator to browse Java code that provide dynamic link to all the symbol and  navigation between files.
 
-Link for [Demo](http://ec2-35-178-134-147.eu-west-2.compute.amazonaws.com:8080/index.html)
 
 ## Introduction
 
