@@ -46,8 +46,3 @@ Before any user can start to use this system, some specific source code should b
 **In stage 1**, the Analysis Module will parse and analyse the source code including all jar files, generating ASTs and static HTML files which provide syntax highlighting feature, then save it to the storage module.
 
 **In** **stage 2**, user can access this Web Module of the system with a web browser, finding the java class they want to review. The java source code will be presented as a webpage with syntax highlight so that they can click the Types (classes, interfaces) within this webpage and get navigated to the correct target java file presented as a webpage as well. They can also provide their own classpath file, and the navigation system will filter out those packages that are not included in the classpath file, which will make the result more accurate as what it is like in a local IDE environment.
-
-## Progress
-As what is planned, the project is now in Sprint 3 with two successful versions released during Sprint 1 and 2. Two milestones have being achieved, which is Sprint1 JAVA parsing and Sprint 2 HTML generating. Currently, the system can analyse and parse an entire JAVA repository and generate HTML files and Compilation Unit information accordingly. 
-
-![HTML Screenshot](https://github.com/DnsZhou/online-Java-navigator/blob/master/pic/HtmlScreenshot.png)
